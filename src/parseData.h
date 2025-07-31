@@ -10,6 +10,8 @@
 #include <sstream>
 #include <iostream>
 #include <queue>
+#include <curl.h>
+#include <json.hpp>
 
 //for random number generator, used: https://en.cppreference.com/w/cpp/numeric/random/rand.html
 #include <ctime>
@@ -147,6 +149,29 @@ class ParseData{
       sortWeights();
     }
 
+
+    void setNames(vector<int> ids, string apiKey){
+       for(auto x : ids){
+         namesMap[x].push_back(getName(x, apiKey));
+       }
+
+    }
+
+    string getName(int id, string apiKey){
+        CURL* curl = curl_easy_init();
+        string res;
+        string url = "https://api.nal.usda.gov/fdc/v1/food/" + to_string(id) + "?api_key=" + apiKey;
+
+        if(!curl){
+          cout << "CURL ERROR" << endl;
+        }
+
+        //set url
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+
+
+    }
 
 
 
