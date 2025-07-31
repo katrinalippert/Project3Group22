@@ -3,7 +3,7 @@
 //
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include <curl/curl.h>
+#include <curl.h>
 
 using namespace std;
 
@@ -11,7 +11,9 @@ using namespace std;
 int main() {
     cout << "TEST";
 
-    sf::RenderWindow testWindow(sf::VideoMode(500,500), "TEST");
+
+
+    sf::RenderWindow testWindow(sf::VideoMode(800,800), "TEST");
     while (testWindow.isOpen()) {
         
         sf::Event event;
