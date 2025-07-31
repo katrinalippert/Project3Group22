@@ -29,6 +29,24 @@ class ParseData{
   public:
     ParseData(){srand(time(0));} //current time
 
+    void printMaps() {
+      //print cals, weights
+      for (auto it = calWtMap.begin(); it != calWtMap.end(); it++) {
+        cout << "===============================" << endl;
+        cout << "ID: " << it->first << endl;
+        cout << "CALS: " << it->second.first << endl;
+        cout << "WEIGHT: " << it->second.second << endl;
+        cout << "===============================" << endl;
+      }
+
+      for (auto it = namesMap.begin(); it != namesMap.end(); it++) {
+        cout << "++++++++++++++++++++++++++++++" << endl;
+        cout << "ID: " << it->first << endl;
+        cout << "Company: " << it->second[0] << endl;
+        cout << "++++++++++++++++++++++++++++++" << endl;
+      }
+    }
+
     void readCsv(string path, bool randomWeights){
       ifstream file(path);
 
@@ -36,7 +54,7 @@ class ParseData{
         cout << "Error opening file" << endl;
       }
 
-      //ID,Company,name,cals,weight
+      //ID,Company,cals,weight
       string line;
       int i = 0;
       while(getline(file, line)){
@@ -52,16 +70,14 @@ class ParseData{
           pair<float, float> calWt;
 
           string company;
-          string name;
           string val;
 
           getline(in, val, ',');
           int id = stoi(val);
 
+          //actual product name added later by api request; if response not valid default to company name
           getline(in, company, ',');
-          getline(in, name, ',');
           names.push_back(company);
-          names.push_back(name);
 
           namesMap[id] = names;
 
@@ -77,7 +93,7 @@ class ParseData{
             calWt.second = weight;
           }
           else{
-            float randWt = (rand() % 10000) * 0.8;
+            float randWt = (rand() % 7500) * 0.8;
             calWt.second = randWt;
             weight = randWt;
           }
