@@ -3,6 +3,8 @@
 //
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <curl/curl.h>
+
 using namespace std;
 
 
