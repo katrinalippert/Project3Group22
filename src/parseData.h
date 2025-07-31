@@ -9,6 +9,7 @@
 #include <ctime>
 #include <sstream>
 #include <iostream>
+#include <queue>
 
 //for random number generator, used: https://en.cppreference.com/w/cpp/numeric/random/rand.html
 #include <ctime>
@@ -26,8 +27,44 @@ class ParseData{
   //(id, (company, name)
   unordered_map<int, vector<string>> namesMap;
 
+  struct PairComp {
+    //ascending order
+    bool operator()(const pair<int,float>& p1, const pair<int,float>& p2) {
+      return p1.second > p2.second;
+    }
+  };
+
+  void sortWeights() {
+    //O(nlog(n))
+    //min heap
+    priority_queue<pair<int, float>, vector<pair<int, float>>, PairComp> pq;
+
+    //add (id, weight) to min heap
+    for (auto x : weights) {
+      pq.push(x);
+    }
+
+    //clear weights
+    weights = {};
+
+    //add back sorted pairs
+    while (!pq.empty()) {
+      auto curr = pq.top();
+      weights.push_back(curr);
+      pq.pop();
+    }
+
+  }
+
+
   public:
     ParseData(){srand(time(0));} //current time
+
+    void printWeights() {
+      for (auto x : weights) {
+        cout << "ID: " << x.first << " " << "WEIGHT: "<< x.second << endl;
+      }
+    }
 
     void printMaps() {
       //print cals, weights
@@ -105,9 +142,12 @@ class ParseData{
           idWt.second = weight;
 
           weights.push_back(idWt);
-
       }
+
+      sortWeights();
     }
+
+
 
 
 
