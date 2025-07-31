@@ -1,0 +1,319 @@
+commit f3eb315feda478cdb4919720a7961c0321e1bd89
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-07-25
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-07-25
+
+    Bump package and library versions
+
+commit f4d19322d413a6fb380a0699d983462ebb3135ac
+Merge: 6395df1 3da784d
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-07-14
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-07-14
+
+    Merge pull request #380 from ngtcp2/remove-length-from-frame
+    
+    Remove length from nghttp3_frame
+
+commit 3da784da1f51bb7edfe8fe82f8941e569873c034
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-07-14
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-07-14
+
+    Remove length from nghttp3_frame
+    
+    We only use length when writing a frame.  Directly pass the computed
+    the length of the frame payload to the encoder function without
+    setting it to nghttp3_frame_hd struct.  Now nghttp3_frame_hd is only
+    used in tests.
+
+commit 6395df1ca831ac187e92456c88fa555eb05fd7ed
+Merge: 531e86e eb66478
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-07-13
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-07-13
+
+    Merge pull request #379 from ngtcp2/refactor-macros
+    
+    Make macros static inline functions
+
+commit eb6647810d7f31dcf9899dec78832237a4a15ef5
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-07-13
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-07-13
+
+    Make macros static inline functions
+
+commit 531e86ec70b2e4bdda6ee5128809ca0b3e84886e
+Merge: f9b2ccd 9c8f1b2
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-07-13
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-07-13
+
+    Merge pull request #378 from ngtcp2/compound-literals
+    
+    Use compound literals instead of filling with zeros
+
+commit 9c8f1b271079e2594056c65d81d000704849d9c6
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-07-13
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-07-13
+
+    Use compound literals instead of filling with zeros
+
+commit f9b2ccd77a98d4994ebb0d9f770aa06cec21486f
+Merge: b660b05 ebba162
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-07-13
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-07-13
+
+    Merge pull request #377 from ngtcp2/no-zero-clear-frent
+    
+    No need to zero-clear frent
+
+commit ebba162f332f1d5d34163cbc7b707cd002016cfa
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-07-13
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-07-13
+
+    No need to zero-clear frent
+
+commit b660b05792fff917ccfca0fa5ee64f49801cca36
+Merge: bb4f036 6053bc1
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-07-12
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-07-12
+
+    Merge pull request #375 from ngtcp2/origin-changes
+    
+    Origin changes
+
+commit 6053bc10617c298f691dee62a3b5b01316a68643
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-07-12
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-07-12
+
+    Pass origin and originlen to nghttp3_recv_origin
+
+commit d4d4f20b433e19706897c419fe76fa797cbc10ea
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-07-11
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-07-12
+
+    Replace ngtcp2_cvec with ngtcp2_vec and remove ngtcp2_cvec
+
+commit bb4f036b8dab5010add9613f4a5c218966fe40f4
+Merge: aeb9406 78d6c6e
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-07-01
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-07-01
+
+    Merge pull request #373 from ngtcp2/rand-uint8
+    
+    Make nghttp3_rand accept uint8_t buffer
+
+commit 78d6c6e022dec679daa58f70b79ca21a17be3d18
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-07-01
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-07-01
+
+    Make nghttp3_rand accept uint8_t buffer
+
+commit aeb9406858c8ae1da6edbc21add55226d22c6fe1
+Merge: cefbd92 984b229
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-06-30
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-06-30
+
+    Merge pull request #372 from ngtcp2/qpack-encoder-seed
+    
+    Add nghttp3_qpack_encoder_new2
+
+commit 984b2294b1f49777c4c218d51f7b2ddff577fc97
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-06-30
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-06-30
+
+    Add nghttp3_qpack_encoder_new2
+
+commit cefbd92beddb7dc92627365a27f3b8b6fd7c929c
+Merge: 46b14b7 dc86e00
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-06-30
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-06-30
+
+    Merge pull request #371 from ngtcp2/map-seed
+    
+    Map seed
+
+commit dc86e00dfbfe7980398eddbe669b7a966a878ae0
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-06-30
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-06-30
+
+    Add nghttp3_rand
+    
+    Add nghttp3_rand callback and seed nghttp3_map.
+
+commit 641e9cb0c0c870419f90396d3d74c9999bfcfc6e
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-06-30
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-06-30
+
+    Port ngtcp2_map changes
+    
+    seed is set to 0 for now.
+
+commit 46b14b7993364836446f6d16ec32808ee437d67a
+Merge: 03b227b 309dbd2
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-06-28
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-06-28
+
+    Merge pull request #370 from ngtcp2/malformed-http-connection-error
+    
+    Treat malformed HTTP message as a connection error
+
+commit 309dbd2a36c3e063a190b9ba7bbf18fc7139230a
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-06-28
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-06-28
+
+    Treat malformed HTTP message as a connection error
+    
+    These messages mostly come from broken implementations and already
+    treated as a stream error.  This kind of error means how broken the
+    sender is.  Also this vastly simplifies the error handling, and we get
+    less moving parts which is also nice.
+
+commit 03b227b5e8f00920bee40b25f50af33063bb5fd6
+Merge: 06c7dd2 509c932
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-06-21
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-06-21
+
+    Merge pull request #369 from ngtcp2/ngtcp2-map-port
+    
+    Port ngtcp2 map changes
+
+commit 509c93288bea4873ccfcef839117a7485e5027c0
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-06-21
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-06-21
+
+    Port ngtcp2 map changes
+
+commit 06c7dd22da6144b023fe501bdcaf23eaf253119f
+Merge: 9f5b322 8eec563
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-06-07
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-06-07
+
+    Merge pull request #367 from ngtcp2/update-doc
+    
+    Update doc
+
+commit 8eec563d019932c1ca5f31213858f8c196780e2d
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-06-07
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-06-07
+
+    Update doc
+
+commit 9f5b32215000382094dfc050c7c53808e8b995af
+Merge: a0d4d1a e6ba090
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-06-03
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-06-03
+
+    Merge pull request #366 from ngtcp2/clarify-origin-list-object-lifetime
+    
+    Clarify the life time of the object pointed by origin_list
+
+commit e6ba090e46ad1210c7d299b0f1d6b0d03edbddd6
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-06-03
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-06-03
+
+    Clarify the life time of the object pointed by origin_list
+
+commit a0d4d1a49036a03bc06366ff7731bce3d2e29bbd
+Merge: 52e35f1 a0c6dcf
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-06-03
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-06-03
+
+    Merge pull request #365 from ngtcp2/origin
+    
+    Implement RFC 9412 ORIGIN frame
+
+commit a0c6dcf4e322491fd6a00687fc6a3ac4ae857f0c
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-06-01
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-06-03
+
+    Implement RFC 9412 ORIGIN frame
+
+commit 52e35f1f72806c95a8b0bdd3ee8629fd4ef04d80
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-05-27
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-05-27
+
+    Bump library version due to the patch release
+
+commit aa74280eea4e7831d2d355cd4534441f816f5ec5
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2025-05-26
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2025-05-27
+
+    Bump package version
+
+commit a8934aff13d965811378152c36425f3836e68ffb
+Merge: 481af9b 84014a0
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-05-27
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-05-27
+
+    Merge pull request #363 from ngtcp2/revert-359-path-validation
+    
+    Revert "Tighten up :path validation"
+
+commit 84014a0a81f762dbf61fe4bb4b745e4b7cd6de12
+Author:     Tatsuhiro Tsujikawa <404610+tatsuhiro-t@users.noreply.github.com>
+AuthorDate: 2025-05-27
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2025-05-27
+
+    Revert "Tighten up :path validation"
