@@ -10,11 +10,10 @@
 #include <sstream>
 #include <iostream>
 #include <queue>
-#include <curl.h>
+#include <curl/curl.h>
 #include <json.hpp>
 
 //for random number generator, used: https://en.cppreference.com/w/cpp/numeric/random/rand.html
-#include <ctime>
 #include <cstdlib>
 
 using namespace std;
@@ -55,6 +54,61 @@ class ParseData{
       weights.push_back(curr);
       pq.pop();
     }
+  }
+
+  //from curl docs: https://curl.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
+  struct memory {
+    char *response;
+    size_t size;
+  };
+
+  static size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
+    reinterpret_cast<std::string*>(userp)->append(static_cast<char*>(contents), size * nmemb);
+    return size * nmemb;
+  }
+
+  string getName(int id, string apiKey){
+    CURL* curl;
+    CURLcode res;
+    string body;
+
+    string url = "https://api.nal.usda.gov/fdc/v1/food/" + to_string(id) + "?api_key=" + apiKey;
+
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
+
+    if (curl) {
+      //set url for get request
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+      curl_easy_setopt(curl, CURLOPT_CAINFO, "dependencies/curl/curl-8.15.0_4-win64-mingw/dep/cacert/cacert.pem");
+
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
+
+      res = curl_easy_perform(curl);
+
+      //check if request successful
+      if (res != CURLE_OK) {
+        cout << "ERROR WITH REQUEST" << endl;
+        cout << curl_easy_strerror(res) << endl;
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        body.clear();
+        return "";
+      }
+
+      auto bodyJSON = nlohmann::json::parse(body);
+      curl_easy_cleanup(curl);
+      curl_global_cleanup();
+
+      string name = bodyJSON["description"];
+
+      return name;
+    }
+
+
+    return "";
 
   }
 
@@ -82,6 +136,9 @@ class ParseData{
         cout << "++++++++++++++++++++++++++++++" << endl;
         cout << "ID: " << it->first << endl;
         cout << "Company: " << it->second[0] << endl;
+        if (it->second.size() > 1) {
+          cout << "Name: " << it->second[1] << endl;
+        }
         cout << "++++++++++++++++++++++++++++++" << endl;
       }
     }
@@ -102,6 +159,7 @@ class ParseData{
             i++;
             continue;
           }
+
           istringstream in(line);
 
           pair<int, float> idWt;
@@ -151,29 +209,16 @@ class ParseData{
 
 
     void setNames(vector<int> ids, string apiKey){
-       for(auto x : ids){
-         namesMap[x].push_back(getName(x, apiKey));
+       for(auto x : ids) {
+         string name = getName(x, apiKey);
+         if (!name.empty()) {
+           namesMap[x].push_back(name);
+         }
        }
 
+       cout << namesMap[1105904][1] << endl;
+       cout << namesMap[1105905][1] << endl;
     }
-
-    string getName(int id, string apiKey){
-        CURL* curl = curl_easy_init();
-        string res;
-        string url = "https://api.nal.usda.gov/fdc/v1/food/" + to_string(id) + "?api_key=" + apiKey;
-
-        if(!curl){
-          cout << "CURL ERROR" << endl;
-        }
-
-        //set url
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
-
-
-    }
-
-
 
 
 };

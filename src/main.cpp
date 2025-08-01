@@ -3,19 +3,29 @@
 //
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include <curl.h>
+#include <fstream>
+#include "parseData.h"
+#include <curl/curl.h>
 
 using namespace std;
 
 
 int main() {
-    cout << "TEST";
+    cout << "TEST" << endl;
 
+    ParseData test;
+
+    //
+    // test.readCsv("TESTFILE.csv", false);
+    // //
+    // test.setNames({1105904, 1105905}, apiKey);
+    // //
+    // test.printMaps();
 
 
     sf::RenderWindow testWindow(sf::VideoMode(800,800), "TEST");
     while (testWindow.isOpen()) {
-        
+
         sf::Event event;
 
         while (testWindow.pollEvent(event)) {
