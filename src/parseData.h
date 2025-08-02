@@ -188,7 +188,26 @@ class ParseData{
           int id = stoi(val);
 
           //actual product name added later by api request; if response not valid default to company name
-          getline(in, company, ',');
+
+          //check if field is quoted and if not read like normal with , delimiter
+          //otherwise ignore the open quote, read up to closing quote, and ignore comma
+          istringstream testIss(line);
+          string idBuffer;
+          getline(testIss, idBuffer, ',');
+          string companyTest;
+          getline(testIss, companyTest, ',');
+
+          if (companyTest[0] != '"') {
+            getline(in, company, ',');
+          }
+          else {
+            in.ignore();
+            getline(in, company, '"');
+            in.ignore();
+          }
+
+
+
           names.push_back(company);
 
           namesMap[id] = names;
@@ -206,7 +225,17 @@ class ParseData{
           //weight
           getline(in, val, ',');
           //random or file-provided weight
-          float weight = stof(val);
+          float weight;
+          try {
+            weight = stof(val);
+          }
+          catch (invalid_argument e) {
+          cout << "++++++++++++++++++++++++" << endl;
+          cout << "TRIED : " << val << endl;
+          cout << "ID: " << id << endl;
+          cout << "++++++++++++++++++++++++" << endl;
+        }
+
           if(!randomWeights){
             calWt.second = weight;
           }

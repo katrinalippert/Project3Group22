@@ -19,8 +19,9 @@ int main() {
 
     //
     auto start = std::chrono::system_clock::now();
-    test.readCsv("TESTFILE.csv", false);
-    test.printMaps();
+    test.readCsv("food_data.csv", false);
+    // test.printMaps();
+    // test.printSizes();
     auto end = std::chrono::system_clock::now();
     auto duration = chrono::duration_cast<chrono::seconds>(end-start);
 
