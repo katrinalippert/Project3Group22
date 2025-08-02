@@ -93,6 +93,8 @@ class UI {
     float weightLimit = 5;
     string apiKey;
 
+    bool validKey = true;
+
     float greedyMicroSeconds;
     float dynamicMicroSeconds;
     float greedyTotalWeight;
@@ -101,7 +103,6 @@ class UI {
     int dpTotalItems;
 
     sf::RenderWindow mainWindow;
-    sf::Clock clock;
 
     vector<bool> optionStatus;
 
@@ -120,6 +121,7 @@ class UI {
     sf::Text greedyResultText;
     sf::Text dpResultText;
     sf::Text comparisonText;
+    sf::Text fileOptionText;
 
     SCREEN currScreen;
     INPUT_MODE currInputMode;
@@ -153,7 +155,10 @@ class UI {
         comparisonText.setFont(rm.mainFont);
         comparisonText.setCharacterSize(30);
         comparisonText.setPosition(400,400);
-
+        fileOptionText.setFont(rm.mainFont);
+        fileOptionText.setCharacterSize(35);
+        fileOptionText.setPosition(200,640);
+        fileOptionText.setString("PRESS W TO CREATE FILES LISTING ITEMS CHOSEN");
 
         //main menu text
         windowTitle.setFont(rm.mainFont);
@@ -186,7 +191,7 @@ class UI {
 
         prompt.setCharacterSize(30);
         resultsDisplay.setCharacterSize(30);
-        validationResponse.setCharacterSize(30);
+        validationResponse.setCharacterSize(40);
         userInputDisplay.setCharacterSize(40);
         userInputDisplay.setPosition(375, 230);
         userInputDisplay.setString(userInput);
@@ -194,7 +199,7 @@ class UI {
 
 
         prompt.setPosition(100,100);
-        validationResponse.setPosition(100,100);
+        validationResponse.setPosition(155,280);
         infoText.setPosition(50,700);
 
         string info = "Press SPACE to return to Main Menu\nPress R to Reset\nPress ESC to Exit";
@@ -261,7 +266,7 @@ void UI::StartUI() {
 
      //conditional displays
       if (currScreen == SCREEN::OPTIONS) {
-        cout << "OPTIONS SCREEN " << endl;
+        // cout << "OPTIONS SCREEN " << endl;
         if (event.type == sf::Event::KeyPressed) {
           if (event.key.code == sf::Keyboard::Num1) {
             cout << "API KEY" << endl;
@@ -381,12 +386,27 @@ void UI::StartUI() {
       }
       else if (currScreen == SCREEN::INPUT) {
 
-        cout << "INPUT SCREEN" << endl;
+        // cout << "INPUT SCREEN" << endl;
         if (selectedOption == 1) {
           windowTitle.setString("ENTER FOOD CENTRAL API KEY");
           windowTitle.setPosition(270, 140);
           if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Enter) {
+              apiKey = "";
+              cout << "CURRENT API KEY: START" << userInput << "END" << endl;
+              //guwqECfPfPCfUowggMM92WndoxcCobetdIF2TEDO
+              bool works = parser.testApiKey(userInput);
+              if (!works) {
+                cout << "INVALID API KEY" << endl;
+                userInput.clear();
+                validKey = false;
+                continue;
+              }
+              // if (!parser.testApiKey("guwqECfPfPCfUowggMM92WndoxcCobetdIF2TEDO")) {
+              //   cout << "INVALID KEY" << endl;
+              //   continue;
+              // }
+              validKey = true;
               apiKey = userInput;
               cout << "API KEY FINAL: " << apiKey << endl;
               currScreen = SCREEN::OPTIONS;
@@ -397,15 +417,22 @@ void UI::StartUI() {
                 cout << "INPUT NOW API: " << userInput << endl;
               }
             }
+            //enable pasting key
+            if (event.key.control && event.key.code == sf::Keyboard::V) {
+              sf::String pasted = sf::Clipboard::getString();
+              userInput = pasted.toAnsiString();
+              break;
+            }
           }
           else if (event.type == sf::Event::TextEntered) {
             if (event.text.unicode >= 33 && event.text.unicode <= 126 ) {
               userInput += static_cast<char>(event.text.unicode);
             }
             cout << "INPUT NOW API: " << userInput << endl;
+            userInputDisplay.setString(userInput);
           }
 
-          userInputDisplay.setString(userInput);
+
 
         }
 
@@ -442,15 +469,25 @@ void UI::StartUI() {
         }
       }
       else if (currScreen == SCREEN::DISPLAY_RESULTS) {
+          if (optionStatus[4] && optionStatus[5] && validKey) {
+            if (event.type == sf::Event::KeyPressed) {
+              if (event.key.code == sf::Keyboard::W) {
+                cout << "VALID W PRESS " << endl;
+                //create greedy and dynamic txt files listing items chosen
+                // parser.createItemCsv(finalWeights, 0);
+                // parser.createItemCsv(finalWeights, 1);
+              }
+            }
+          }
           if (!optionStatus[4] && !optionStatus[5]) {
             windowTitle.setString("RESULTS\n\n\n\n");
             resultsDisplay.setString("                          NO RESULTS TO DISPLAY.\nPLEASE RUN GREEDY AND/OR DYNAMIC PROGRAMMING ALGORITHMS.\nNOTE: YOU MUST RUN BOTH ALGORITHMS TO SEE A COMPARISON.");
             resultsDisplay.setPosition(190, 250);
-            resultsDisplay.setFillColor(sf::Color(245, 107, 27));
+            resultsDisplay.setFillColor(sf::Color(214, 101, 15));
           }
           else {
             windowTitle.setString("RESULTS");
-
+            resultsDisplay.setString("");
             rm.greedyTexts["title"].setPosition(50,200);
             rm.greedyTexts["time"].setPosition(50,250);
             rm.greedyTexts["weight"].setPosition(50,375);
@@ -479,32 +516,45 @@ void UI::StartUI() {
     mainWindow.clear(sf::Color(117, 161, 155));
     if (currScreen == SCREEN::DISPLAY_RESULTS) {
       mainWindow.draw(resultsDisplay);
+      if (optionStatus[4] || optionStatus[5]) {
+        //DISPLAY GREEDY
+        if (!optionStatus[4]) {
+          mainWindow.draw(rm.greedyTexts["title"]);
+        }
+        if (optionStatus[4]) {
+          mainWindow.draw(rm.greedyTexts["title"]);
+          mainWindow.draw(rm.greedyTexts["time"]);
+          mainWindow.draw(rm.greedyTexts["weight"]);
+        }
 
-      //DISPLAY GREEDY
-      if (!optionStatus[4]) {
-        mainWindow.draw(rm.greedyTexts["title"]);
-      }
-      if (optionStatus[4]) {
-        mainWindow.draw(rm.greedyTexts["title"]);
-        mainWindow.draw(rm.greedyTexts["time"]);
-        mainWindow.draw(rm.greedyTexts["weight"]);
+        if (!optionStatus[5]) {
+          mainWindow.draw(rm.dynamicTexts["title"]);
+        }
+
+        if (optionStatus[5]) {
+          mainWindow.draw(rm.dynamicTexts["title"]);
+          mainWindow.draw(rm.dynamicTexts["time"]);
+          mainWindow.draw(rm.dynamicTexts["weight"]);
+        }
+
+        if (optionStatus[4] && optionStatus[5] && validKey) {
+          mainWindow.draw(fileOptionText);
+        }
       }
 
-      if (!optionStatus[5]) {
-        mainWindow.draw(rm.dynamicTexts["title"]);
-      }
-
-      if (optionStatus[5]) {
-        mainWindow.draw(rm.dynamicTexts["title"]);
-        mainWindow.draw(rm.dynamicTexts["time"]);
-        mainWindow.draw(rm.dynamicTexts["weight"]);
-      }
     }
 
     else if (currScreen == SCREEN::INPUT) {
       if (selectedOption == 1) {
-        userInputDisplay.setString(userInput);
+        int stars = userInput.length();
+        userInputDisplay.setString(string(stars, '*'));
+        userInputDisplay.setCharacterSize(50);
         mainWindow.draw(userInputDisplay);
+        if (!validKey) {
+          validationResponse.setFillColor(sf::Color(214, 101, 15));
+          validationResponse.setString(" \t\t\t\t\t\tINVALID API KEY.\nPLEASE ENTER VALID KEY OR RETURN TO MENU.\nNOTE: API KEY NEEDED TO OBTAIN FILES WITH ITEMS CHOSEN.");
+          mainWindow.draw(validationResponse);
+        }
       }
       if (selectedOption == 4) {
         userInputDisplay.setString(userInput);
@@ -518,8 +568,11 @@ void UI::StartUI() {
       windowTitle.setString("MAIN MENU");
       int  i = 0;
       for (auto opt : rm.optionTexts) {
-        if (optionStatus[i]) {
+        if (optionStatus[i] && i != 6) {
           opt.setFillColor(sf::Color::Green);
+          if (i == 0 && !validKey) {
+            opt.setFillColor(sf::Color(235, 176, 82));
+          }
         }
         else {
           opt.setFillColor(sf::Color::White);

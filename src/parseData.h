@@ -141,11 +141,14 @@ class ParseData{
       api_key.clear();
     }
 
+
+  //DEBUGGING ONLY==================================================================
     void printWeights() {
       for (auto x : weights) {
         cout << "ID: " << x.first << " " << "WEIGHT: "<< x.second << endl;
       }
     }
+
 
     void printMaps() {
       //print cals, weights
@@ -167,6 +170,7 @@ class ParseData{
         cout << "++++++++++++++++++++++++++++++" << endl;
       }
     }
+//================================================================================
 
     void readCsv(string path, bool randomWeights){
       ifstream file(path);
@@ -286,14 +290,28 @@ class ParseData{
 
     bool testApiKey(string apiKey) {
       //for testing if user's api key is valid
-      string testResult = getName(1105904, apiKey);
-      //getName returns empty string if unsuccessful so if test result is empty user api key invalid
-      if (!testResult.empty()) {
-        return true;
+      string testResult = "";
+      try {
+        string testResult = getName(1105904, apiKey);
+        cout << "RESULT : " << testResult << endl;
       }
-
-      return false;
+      catch (nlohmann::json::exception e) {
+        return false;
+      }
+      //getName returns empty string if unsuccessful so if test result is empty user api key invalid
+      return true;
     }
 
+    void createItemCsv(vector<pair<int, float>> finalWeights, int choice) {
+      string path = "greedyItemsChosen.txt";
+      //1 = dynamic
+      if (choice == 1) {
+        path = "dynamicItemsChosen.txt";
+      }
 
+      ofstream outputFile(path);
+      if (outputFile.is_open()) {
+
+      }
+    }
 };
