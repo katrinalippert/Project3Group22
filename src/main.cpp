@@ -16,7 +16,6 @@ int main() {
     cout << "TEST" << endl;
 
     // ParseData test;
-    // bool works = test.testApiKey("guwqECfPfPCfUowggMM92WndoxcCobetdIF2TEDO");
     // cout << works << endl;
 
     //
