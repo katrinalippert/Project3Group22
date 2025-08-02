@@ -19,6 +19,7 @@
 using namespace std;
 
 class ParseData{
+
   //to sort weights, store with id (id, weight)
   vector<pair<int,float>> weights;
 
@@ -109,14 +110,23 @@ class ParseData{
       return name;
     }
 
-
     return "";
-
   }
-
 
   public:
     ParseData(){srand(time(0));} //current time
+
+    float getTotalWeight(vector<pair<int,float>> finalWeights) {
+      float total = 0;
+      for (auto x : finalWeights) {
+        total += x.second;
+      }
+      return total;
+    }
+
+    int getTotalItems(vector<pair<int,float>> finalWeights) {
+      return finalWeights.size();
+    }
 
     void printSizes() {
       cout << "NAMES MAP: " << namesMap.size() << endl;
