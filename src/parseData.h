@@ -201,7 +201,7 @@ class ParseData{
           getline(in, val, ',');
           int id = stoi(val);
 
-          //actual product name added later by api request; if response not valid default to company name
+          //actual product name added later by api request; if response not valid default to product id
 
           //check if field is quoted and if not read like normal with , delimiter
           //otherwise ignore the open quote, read up to closing quote, and ignore comma

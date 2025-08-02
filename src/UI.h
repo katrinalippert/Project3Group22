@@ -7,6 +7,7 @@
 #include <vector>
 #include "parseData.h"
 #include <chrono>
+#include <unordered_map>
 
 using namespace std;
 
@@ -19,8 +20,8 @@ struct ResourceManager{
     vector<string> optionStrings;
     vector<sf::Text> optionTexts;
 
-    map<string, sf::Text> greedyTexts;
-    map<string, sf::Text> dynamicTexts;
+    unordered_map<string, sf::Text> greedyTexts;
+    unordered_map<string, sf::Text> dynamicTexts;
 
 
     ResourceManager(){
@@ -477,9 +478,17 @@ void UI::StartUI() {
         }
       }
       else if (currScreen == SCREEN::DISPLAY_RESULTS) {
-          if (optionStatus[4] && optionStatus[5] && validKey) {
+          if (optionStatus[4] && optionStatus[5]) {
             if (event.type == sf::Event::KeyPressed) {
               if (event.key.code == sf::Keyboard::W) {
+                if (apiKey.empty() || !validKey) {
+                  //default to company names
+                  cout << "PRODUCT ID: " << endl;
+                }
+                else if (validKey && !apiKey.empty()) {
+                  //make api requests
+                  cout << "NAMES: " << endl;
+                }
                 cout << "VALID W PRESS " << endl;
                 //create greedy and dynamic txt files listing items chosen
                 // parser.createItemCsv(finalWeights, 0);
@@ -549,7 +558,7 @@ void UI::StartUI() {
           mainWindow.draw(rm.dynamicTexts["cals"]);
         }
 
-        if (optionStatus[4] && optionStatus[5] && validKey) {
+        if (optionStatus[4] && optionStatus[5]) {
           mainWindow.draw(fileOptionText);
         }
       }
@@ -564,7 +573,7 @@ void UI::StartUI() {
         mainWindow.draw(userInputDisplay);
         if (!validKey) {
           validationResponse.setFillColor(sf::Color(214, 101, 15));
-          validationResponse.setString(" \t\t\t\t\t\tINVALID API KEY.\nPLEASE ENTER VALID KEY OR RETURN TO MENU.\nNOTE: API KEY NEEDED TO OBTAIN FILES WITH ITEMS CHOSEN.");
+          validationResponse.setString(" \t\t\t\t\t\tINVALID API KEY.\nPLEASE ENTER VALID KEY OR RETURN TO MENU.\nNOTE: API KEY NEEDED TO OBTAIN NAMES OF ITEMS CHOSEN\n(DEFAULT IS PRODUCT ID).");
           mainWindow.draw(validationResponse);
         }
       }
