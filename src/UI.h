@@ -394,7 +394,7 @@ void UI::StartUI() {
             if (event.key.code == sf::Keyboard::Enter) {
               apiKey = "";
               cout << "CURRENT API KEY: START" << userInput << "END" << endl;
-              //guwqECfPfPCfUowggMM92WndoxcCobetdIF2TEDO
+
               bool works = parser.testApiKey(userInput);
               if (!works) {
                 cout << "INVALID API KEY" << endl;
