@@ -402,10 +402,7 @@ void UI::StartUI() {
                 validKey = false;
                 continue;
               }
-              // if (!parser.testApiKey("guwqECfPfPCfUowggMM92WndoxcCobetdIF2TEDO")) {
-              //   cout << "INVALID KEY" << endl;
-              //   continue;
-              // }
+
               validKey = true;
               apiKey = userInput;
               cout << "API KEY FINAL: " << apiKey << endl;
