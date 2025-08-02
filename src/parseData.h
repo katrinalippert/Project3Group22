@@ -28,6 +28,8 @@ class ParseData{
   //(id, (company, name)
   unordered_map<int, vector<string>> namesMap;
 
+  string api_key = "";
+
   struct PairComp {
     //ascending order
     bool operator()(const pair<int,float>& p1, const pair<int,float>& p2) {
@@ -116,6 +118,19 @@ class ParseData{
   public:
     ParseData(){srand(time(0));} //current time
 
+    void printSizes() {
+      cout << "NAMES MAP: " << namesMap.size() << endl;
+      cout << "CAL WEIGHT: " << calWtMap.size() << endl;
+      cout << "WEIGHT VECTOR: " << weights.size() << endl;
+    }
+
+    void resetParser() {
+      weights.clear();
+      namesMap.clear();
+      calWtMap.clear();
+      api_key.clear();
+    }
+
     void printWeights() {
       for (auto x : weights) {
         cout << "ID: " << x.first << " " << "WEIGHT: "<< x.second << endl;
@@ -178,9 +193,15 @@ class ParseData{
 
           namesMap[id] = names;
 
-          //cals
+          //get calories from file otherwise if not present just use random value
           getline(in, val, ',');
-          calWt.first = stof(val);
+          try {
+            calWt.first = stof(val);
+          }
+          catch (invalid_argument e) {
+            float randCal = (rand() % 950) * 0.97;
+            calWt.first = randCal;
+          }
 
           //weight
           getline(in, val, ',');
@@ -218,6 +239,21 @@ class ParseData{
 
        cout << namesMap[1105904][1] << endl;
        cout << namesMap[1105905][1] << endl;
+    }
+
+    void setApiKey(string apiKey) {
+      api_key = apiKey;
+    }
+
+    bool testApiKey(string apiKey) {
+      //for testing if user's api key is valid
+      string testResult = getName(1105904, apiKey);
+      //getName returns empty string if unsuccessful so if test result is empty user api key invalid
+      if (!testResult.empty()) {
+        return true;
+      }
+
+      return false;
     }
 
 
