@@ -33,14 +33,17 @@ struct ResourceManager{
       sf::Text dynamicTime("TIME TAKEN: ", mainFont, 30);
       sf::Text greedyWeight("TOTAL WEIGHT(KG): ", mainFont, 30);
       sf::Text dynamicWeight("TOTAL WEIGHT(KG): ", mainFont, 30);
+      sf::Text greedyCals("TOTAL CALORIES: ", mainFont, 30);
+      sf::Text dynamicCals("TOTAL CALORIES: ", mainFont, 30);
       greedyTexts["title"] = greedyTitle;
       greedyTexts["time"] = greedyTime;
       greedyTexts["weight"] = greedyWeight;
+      greedyTexts["cals"] = greedyCals;
 
       dynamicTexts["title"] = dynamicTitle;
       dynamicTexts["time"] = dynamicTime;
       dynamicTexts["weight"] = dynamicWeight;
-
+      dynamicTexts["cals"] = dynamicCals;
 
 
       //knapsack icon
@@ -346,6 +349,10 @@ void UI::StartUI() {
             string currWeight = rm.greedyTexts["weight"].getString();
             currWeight += "\n\n" + to_string(greedyTotalWeight);
             rm.greedyTexts["weight"].setString(currWeight);
+
+            string currCals = rm.greedyTexts["cals"].getString();
+            // currCals += "\n\n" + to_string(getTotalCals(finalWeights));
+            rm.greedyTexts["cals"].setString(currCals);
           }
 
           if (event.key.code == sf::Keyboard::Num6) {
@@ -369,6 +376,10 @@ void UI::StartUI() {
             string currWeight = rm.dynamicTexts["weight"].getString();
             currWeight += "\n\n" + to_string(dpTotalWeight);
             rm.dynamicTexts["weight"].setString(currWeight);
+
+            string currCals = rm.dynamicTexts["cals"].getString();
+            // currCals += "\n\n" + to_string(getTotalCals(finalWeights));
+            rm.dynamicTexts["cals"].setString(currCals);
           }
         }
 
@@ -488,10 +499,12 @@ void UI::StartUI() {
             rm.greedyTexts["title"].setPosition(50,200);
             rm.greedyTexts["time"].setPosition(50,250);
             rm.greedyTexts["weight"].setPosition(50,375);
+            rm.greedyTexts["cals"].setPosition(50, 500);
 
             rm.dynamicTexts["title"].setPosition(625,200);
             rm.dynamicTexts["time"].setPosition(625,250);
             rm.dynamicTexts["weight"].setPosition(625,375);
+            rm.dynamicTexts["cals"].setPosition(625, 500);
           }
 
             //show greed
@@ -522,6 +535,7 @@ void UI::StartUI() {
           mainWindow.draw(rm.greedyTexts["title"]);
           mainWindow.draw(rm.greedyTexts["time"]);
           mainWindow.draw(rm.greedyTexts["weight"]);
+          mainWindow.draw(rm.greedyTexts["cals"]);
         }
 
         if (!optionStatus[5]) {
@@ -532,6 +546,7 @@ void UI::StartUI() {
           mainWindow.draw(rm.dynamicTexts["title"]);
           mainWindow.draw(rm.dynamicTexts["time"]);
           mainWindow.draw(rm.dynamicTexts["weight"]);
+          mainWindow.draw(rm.dynamicTexts["cals"]);
         }
 
         if (optionStatus[4] && optionStatus[5] && validKey) {
@@ -569,6 +584,9 @@ void UI::StartUI() {
           opt.setFillColor(sf::Color::Green);
           if (i == 0 && !validKey) {
             opt.setFillColor(sf::Color(235, 176, 82));
+          }
+          else if (i == 0 && apiKey.empty()) {
+            opt.setFillColor(sf::Color::White);
           }
         }
         else {

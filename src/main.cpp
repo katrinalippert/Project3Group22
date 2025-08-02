@@ -12,7 +12,7 @@
 using namespace std;
 
 
-int main() {
+int main() { 
     cout << "TEST" << endl;
 
     // ParseData test;
