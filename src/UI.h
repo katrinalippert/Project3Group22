@@ -345,27 +345,35 @@ void UI::StartUI() {
           }
 
           if (event.key.code == sf::Keyboard::Num5) {
-            //do not run if no dataset loaded
+            // Do not run if no dataset loaded
             if (!optionStatus[1] && !optionStatus[2]) {
               continue;
             }
-            //run greedy solution
+
             cout << "GREEDY" << endl;
             auto greedyStart = chrono::high_resolution_clock::now();
-            //call greedy
+
+            // Call greedy function: make sure to multiply weightLimit by 1000 if your weights are in grams
+            Result greedyResult = runKnapsackGreedy(parser.getFoodItems(), weightLimit * 1000);
+
             auto greedyEnd = chrono::high_resolution_clock::now();
             auto greedyDuration = chrono::duration_cast<chrono::microseconds>(greedyEnd - greedyStart);
             greedyMicroSeconds = greedyDuration.count();
-            //set total weight
-            //final weights is vector<pair<int,float>> (id, weight)
-            // greedyTotalWeight = parser.getTotalWeight(finalWeights);
 
+            // Store results for display
+            greedyTotalWeight = greedyResult.totalWeight / 1000.0f; // convert grams -> kg for display
+            greedyTotalCals = greedyResult.totalCalories;
+            greedyTotalItems = (int)greedyResult.selectedItems.size();
+
+            // Mark greedy as completed
             optionStatus[4] = true;
+
+            // Update UI texts
             rm.greedyTexts["title"].first.setString("GREEDY:");
             rm.greedyTexts["title"].first.setFillColor(sf::Color::White);
 
             string currString = rm.greedyTexts["time"].first.getString();
-            currString += "\n\n" + to_string(greedyMicroSeconds) + "  us";
+            currString += "\n\n" + to_string(greedyMicroSeconds) + " us";
             rm.greedyTexts["time"].first.setString(currString);
 
             string currWeight = rm.greedyTexts["weight"].first.getString();
@@ -373,7 +381,7 @@ void UI::StartUI() {
             rm.greedyTexts["weight"].first.setString(currWeight);
 
             string currCals = rm.greedyTexts["cals"].first.getString();
-            // currCals += "\n\n" + to_string(getTotalCals(finalWeights));
+            currCals += "\n\n" + to_string(greedyTotalCals);
             rm.greedyTexts["cals"].first.setString(currCals);
           }
 
