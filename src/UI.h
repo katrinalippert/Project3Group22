@@ -250,7 +250,7 @@ class UI {
 
       //press R to reset
       void resetUI(){
-        cout << "RESET CALLED" << endl;
+        cout << "RESET" << endl;
         parser.resetParser();
         for(int i = 0; i < 7; i++){
           optionStatus[i] = false;
@@ -276,15 +276,7 @@ class UI {
         cout << "API KEY AFTER RESET: " << apiKey << endl;
       }
 
-      string findOptimal() {
-        if (dpTotalWeight < greedyTotalWeight && dpTotalWeight < weightLimit) {
-          return "DYNAMIC";
-        }
-        if (greedyTotalWeight < weightLimit && greedyTotalWeight < dpTotalWeight) {
-          return "GREEDY";
-        }
-        return "NEITHER APPROACH\nPRODUCED A\nCORRECT SOLUTION";
-      }
+
 
 };
 
@@ -317,7 +309,6 @@ void UI::StartUI() {
         // cout << "OPTIONS SCREEN " << endl;
         if (event.type == sf::Event::KeyPressed) {
           if (event.key.code == sf::Keyboard::Num1) {
-            cout << "API KEY" << endl;
             windowTitle.setString("ENTER FOOD CENTRAL API KEY");
             windowTitle.setPosition(270, 140);
             userInput.clear();
@@ -367,9 +358,8 @@ void UI::StartUI() {
             currScreen = SCREEN::INPUT;
             optionStatus[3] = true;
             selectedOption = 4;
-            cout << "USER INPUT BEFORE INPUT WINDOW: " << userInput << endl;
-            sf::Event bufferEvent;
             //so weight limit not started with 4
+            sf::Event bufferEvent;
             while (mainWindow.pollEvent(bufferEvent)) {}
             break;
           }
@@ -423,7 +413,6 @@ void UI::StartUI() {
             //call dp
             //weight limit * 1000 bc need to convert to grams
             int limitKG = static_cast<int>(weightLimit);
-            cout << "WEIGHT LIMIT PARAMETER: " << limitKG  << endl;
             dpResult = runKnapsackDP(parser.getFoodItems(), limitKG);
 
             auto dpEnd = chrono::high_resolution_clock::now();
@@ -440,7 +429,6 @@ void UI::StartUI() {
             string currString = rm.dynamicTexts["time"].first.getString();
             ostringstream ss;
             ss << currString << "\n\n" << fixed << setprecision(2) <<  dynamicMicroSeconds/1000 << "  ms";
-            cout << "TIME STRING: " << ss.str() << endl;
             rm.dynamicTexts["time"].first.setString(ss.str());
             ss.str("");
 
@@ -482,7 +470,6 @@ void UI::StartUI() {
           if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Enter) {
               apiKey = "";
-              cout << "CURRENT API KEY: START" << userInput << "END" << endl;
               //if key invalid clear user input and allow retry but if valid set the key and complete option
               bool works = parser.testApiKey(userInput);
               if (!works) {
@@ -494,13 +481,11 @@ void UI::StartUI() {
               optionStatus[0] = true;
               validKey = true;
               apiKey = userInput;
-              cout << "API KEY FINAL: " << apiKey << endl;
               currScreen = SCREEN::OPTIONS;
             }
             if (event.key.code == sf::Keyboard::BackSpace) {
               if (!userInput.empty()) {
                 userInput.pop_back();
-                cout << "INPUT NOW API: " << userInput << endl;
               }
             }
             //enable pasting key
@@ -514,7 +499,6 @@ void UI::StartUI() {
             if (event.text.unicode >= 33 && event.text.unicode <= 126 ) {
               userInput += static_cast<char>(event.text.unicode);
             }
-            cout << "INPUT NOW API: " << userInput << endl;
             userInputDisplay.setString(userInput);
           }
         }
@@ -531,21 +515,16 @@ void UI::StartUI() {
             }
             //delete last character of string
             if (event.key.code == sf::Keyboard::BackSpace) {
-              cout << "BACK SPACE" << endl;
               if (!userInput.empty()) {
                 userInput.pop_back();
-                cout << "INPUT NOW: " << userInput << endl;
               }
             }
           }
           else if (event.type == sf::Event::TextEntered && currInputMode == INPUT_MODE::ENTER) {
             //must be digit for weight limit
-            cout << "ENTERING TEXT" << endl;
             if (event.text.unicode >= '0' && event.text.unicode <= '9' || event.text.unicode == 46) {
               userInput += static_cast<char>(event.text.unicode);
-              cout << "INPUT NOW: " << userInput << endl;
             }
-
           }
           userInputDisplay.setString(userInput);
           currInputMode = INPUT_MODE::ENTER;
@@ -670,14 +649,6 @@ void UI::StartUI() {
         }
 
         if (optionStatus[4] && optionStatus[5]) {
-          // if (isDpOptimalRatio()) {
-          //   rm.dynamicTexts["title"].first.setFillColor(sf::Color(sf::Color::Green));
-          //   rm.dynamicTexts["title"].first.setStyle(sf::Text::Bold);
-          // }
-          // else {
-          //   rm.greedyTexts["title"].first.setFillColor(sf::Color(sf::Color::Green));
-          //   rm.greedyTexts["title"].first.setStyle(sf::Text::Bold);
-          // }
           mainWindow.draw(fileOptionText);
         }
       }

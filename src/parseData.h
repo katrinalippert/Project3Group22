@@ -168,9 +168,7 @@ class ParseData{
 
           istringstream in(line);
 
-          pair<int, float> idWt;
           vector<string> names;
-          pair<float, float> calWt;
 
           string company;
           string val;
@@ -242,24 +240,12 @@ class ParseData{
     }
 
 
-    void setNames(vector<int> ids, string apiKey){
-       for(auto x : ids) {
-         string name = getName(x, apiKey);
-         if (!name.empty()) {
-           namesMap[x].push_back(name);
-         }
-       }
-
-    }
-
-
     bool testApiKey(string apiKey) {
       //for testing if user's api key is valid
       string testResult = "";
       try {
         string testResult = getName(1105904, apiKey);
         return testResult != "";
-        cout << "RESULT : " << testResult << endl;
       }
       catch (nlohmann::json::exception e) {
         return false;
