@@ -221,25 +221,18 @@ class ParseData{
             item.calories = randCal;
           }
 
-          //weight
-          getline(in, val, ',');
-          //random or file-provided weight
-          float weight;
-          try {
-            weight = stof(val);
-            item.weight = weight;
-          }
-          catch (invalid_argument e) {
-          cout << "++++++++++++++++++++++++" << endl;
-          cout << "TRIED : " << val << endl;
-          cout << "ID: " << id << endl;
-          cout << "++++++++++++++++++++++++" << endl;
-        }
+        // weight
+        getline(in, val, ',');
+        float rawGrams = 0.0f;
+        try {
+          rawGrams = stof(val);
+        } catch (...) { }
+        item.weight = rawGrams / 1000.0f;
 
+        // random override
         if (randomWeights) {
-          // cout << "CHANGING WEIGHT" << endl;
-          float randWt = (rand() % 6231) * 0.8;
-          item.weight = randWt;
+          float raw = (rand() % 6231) * 0.8f;
+          item.weight = raw / 1000.0f;
         }
 
           calWtMap[id] = item;
