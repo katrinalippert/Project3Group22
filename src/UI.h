@@ -353,7 +353,7 @@ void UI::StartUI() {
             cout << "GREEDY" << endl;
             auto greedyStart = chrono::high_resolution_clock::now();
 
-            // Call greedy function: make sure to multiply weightLimit by 1000 if your weights are in grams
+            // Call greedy function
             Result greedyResult = runKnapsackGreedy(parser.getFoodItems(), weightLimit * 1000);
 
             auto greedyEnd = chrono::high_resolution_clock::now();
