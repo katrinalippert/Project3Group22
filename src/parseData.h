@@ -49,7 +49,7 @@ class ParseData{
     ParseData(){srand(time(0));} //current time
 
     string getCompanyName(int id) {
-      if (!namesMap.empty()) {
+      if (!namesMap.empty() && namesMap.find(id) != namesMap.end()) {
         return namesMap[id][0];
       }
       return "";
