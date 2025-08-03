@@ -246,7 +246,6 @@ class ParseData{
           foodItems.push_back(item);
       }
 
-      // sortWeights();
     }
 
 
@@ -258,8 +257,6 @@ class ParseData{
          }
        }
 
-       // cout << namesMap[1105904][1] << endl;
-       // cout << namesMap[1105905][1] << endl;
     }
 
 
