@@ -298,7 +298,7 @@ class ParseData{
       return true;
     }
 
-    void createItemCsv(vector<pair<int, float>> finalWeights, int choice) {
+    void createItemTxt(Result& result, int choice, string apiKey) {
       string path = "greedyItemsChosen.txt";
       //1 = dynamic
       if (choice == 1) {
@@ -307,7 +307,16 @@ class ParseData{
 
       ofstream outputFile(path);
       if (outputFile.is_open()) {
-
+        int i = 0;
+        for (auto item : result.selectedItems) {
+          if (i < result.selectedItems.size() - 1) {
+            outputFile << getName(item.id, apiKey) << "\n";
+          }
+          else {
+            outputFile << getName(item.id, apiKey);
+          }
+          i++;
+        }
       }
     }
 };

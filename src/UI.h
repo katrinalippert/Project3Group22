@@ -9,6 +9,8 @@
 #include "knapsackSolution.h"
 #include <chrono>
 #include <unordered_map>
+#include <sstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -110,6 +112,9 @@ class UI {
 
     int greedyTotalItems;
     int dpTotalItems;
+
+    Result greedyResult;
+    Result dpResult;
 
     sf::RenderWindow mainWindow;
 
@@ -365,16 +370,20 @@ void UI::StartUI() {
             rm.greedyTexts["title"].first.setFillColor(sf::Color::White);
 
             string currString = rm.greedyTexts["time"].first.getString();
-            currString += "\n\n" + to_string(greedyMicroSeconds) + "  us";
-            rm.greedyTexts["time"].first.setString(currString);
+            ostringstream ss;
+            ss << currString << "\n\n" << fixed << setprecision(2) << greedyMicroSeconds << " us";
+            rm.greedyTexts["time"].first.setString(ss.str());
+            //clear ss
+            ss.str("");
 
             string currWeight = rm.greedyTexts["weight"].first.getString();
-            currWeight += "\n\n" + to_string(greedyTotalWeight);
-            rm.greedyTexts["weight"].first.setString(currWeight);
+            ss << currWeight << "\n\n" << fixed << setprecision(2) << greedyTotalWeight;
+            rm.greedyTexts["weight"].first.setString(ss.str());
+            ss.str("");
 
             string currCals = rm.greedyTexts["cals"].first.getString();
-            // currCals += "\n\n" + to_string(getTotalCals(finalWeights));
-            rm.greedyTexts["cals"].first.setString(currCals);
+            ss << currCals << "\n\n" << fixed << setprecision(2) << greedyTotalCals;
+            rm.greedyTexts["cals"].first.setString(ss.str());
           }
 
           if (event.key.code == sf::Keyboard::Num6) {
@@ -389,7 +398,7 @@ void UI::StartUI() {
             auto dpEnd = chrono::high_resolution_clock::now();
             cout << "WEIGHT LIMIT PARAMETER: " << weightLimit  << endl;
             //weight limit * 1000 bc need to convert to grams
-            Result dpResult = runKnapsackDP(parser.getFoodItems(), weightLimit * 1000);
+            dpResult = runKnapsackDP(parser.getFoodItems(), weightLimit * 1000);
             auto dpDuration = chrono::duration_cast<chrono::microseconds>(dpEnd - dpStart);
             dynamicMicroSeconds = dpDuration.count();
             //weights in grams in csv so divide by 1000 when displaying as kg
@@ -401,16 +410,20 @@ void UI::StartUI() {
             rm.dynamicTexts["title"].first.setFillColor(sf::Color::White);
 
             string currString = rm.dynamicTexts["time"].first.getString();
-            currString += "\n\n" + to_string(dynamicMicroSeconds) + "  us";
-            rm.dynamicTexts["time"].first.setString(currString);
+            ostringstream ss;
+            ss << currString << "\n\n" << fixed << setprecision(2) <<  dynamicMicroSeconds << "  us";
+            cout << "TIME STRING: " << ss.str() << endl;
+            rm.dynamicTexts["time"].first.setString(ss.str());
+            ss.str("");
 
             string currWeight = rm.dynamicTexts["weight"].first.getString();
-            currWeight += "\n\n" + to_string(dpTotalWeight);
-            rm.dynamicTexts["weight"].first.setString(currWeight);
+            ss << currWeight << "\n\n" << fixed << setprecision(2) << dpTotalWeight;
+            rm.dynamicTexts["weight"].first.setString(ss.str());
+            ss.str("");
 
             string currCals = rm.dynamicTexts["cals"].first.getString();
-            currCals += "\n\n" + to_string(dpTotalCals);
-            rm.dynamicTexts["cals"].first.setString(currCals);
+            ss << currCals << "\n\n" << fixed << setprecision(2) << dpTotalCals;
+            rm.dynamicTexts["cals"].first.setString(ss.str());
           }
         }
 
@@ -509,18 +522,32 @@ void UI::StartUI() {
           if (optionStatus[4] && optionStatus[5]) {
             if (event.type == sf::Event::KeyPressed) {
               if (event.key.code == sf::Keyboard::W) {
+                //create greedy and dynamic txt files listing items chosen
                 if (apiKey.empty() || !validKey) {
-                  //default to company names
-                  cout << "PRODUCT ID: " << endl;
+                  // ofstream outFileGreedy;
+                  ofstream outFileDp("dynamicItemsChosen.txt");
+                  //default to product ids
+                  //greedy
+                  //dynamic
+                  for (int i = 0; i < dpResult.selectedItems.size(); ++i) {
+                    if (i != dpResult.selectedItems.size() - 1) {
+                       outFileDp << dpResult.selectedItems[i].id <<"\n";
+                    }
+                    else {
+                      outFileDp << dpResult.selectedItems[i].id;
+                    }
+                  }
+
                 }
                 else if (validKey && !apiKey.empty()) {
                   //make api requests
                   cout << "NAMES: " << endl;
+                  // parser.createItemTxt(greedyResult, 0, apiKey);
+                  parser.createItemTxt(dpResult, 1, apiKey);
                 }
                 cout << "VALID W PRESS " << endl;
-                //create greedy and dynamic txt files listing items chosen
-                // parser.createItemCsv(finalWeights, 0);
-                // parser.createItemCsv(finalWeights, 1);
+
+
               }
             }
           }
@@ -557,6 +584,7 @@ void UI::StartUI() {
       if (optionStatus[4] || optionStatus[5]) {
         //DISPLAY GREEDY
         if (!optionStatus[4]) {
+          rm.greedyTexts["title"].first.setFillColor(sf::Color(245, 107, 27));
           mainWindow.draw(rm.greedyTexts["title"].first);
         }
         if (optionStatus[4]) {
@@ -568,6 +596,7 @@ void UI::StartUI() {
 
         //DISPLAY DP
         if (!optionStatus[5]) {
+          rm.dynamicTexts["title"].first.setFillColor(sf::Color(245, 107, 27));
           mainWindow.draw(rm.dynamicTexts["title"].first);
         }
 
