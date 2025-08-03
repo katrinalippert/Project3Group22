@@ -13,51 +13,54 @@
 #include <curl/curl.h>
 #include <json.hpp>
 
+#include "knapsackSolution.h"
+
 //for random number generator, used: https://en.cppreference.com/w/cpp/numeric/random/rand.html
 #include <cstdlib>
 
 using namespace std;
 
 class ParseData{
-
-  //to sort weights, store with id (id, weight)
-  vector<pair<int,float>> weights;
+  //(id, cals, weight)
+  vector<FoodItem> foodItems;
 
   //(id, (cals, weight))
-  unordered_map<int, pair<float, float>> calWtMap;
+  unordered_map<int, FoodItem> calWtMap;
 
   //(id, (company, name)
   unordered_map<int, vector<string>> namesMap;
 
   string api_key = "";
 
-  struct PairComp {
-    //ascending order
-    bool operator()(const pair<int,float>& p1, const pair<int,float>& p2) {
-      return p1.second > p2.second;
-    }
-  };
+  // struct PairComp {
+  //   //ascending order
+  //   bool operator()(const pair<int,float>& p1, const pair<int,float>& p2) {
+  //     return p1.second > p2.second;
+  //   }
+  // };
 
-  void sortWeights() {
-    //O(nlog(n))
-    //min heap
-    priority_queue<pair<int, float>, vector<pair<int, float>>, PairComp> pq;
 
-    //add (id, weight) to min heap
-    for (auto x : weights) {
-      pq.push(x);
-    }
-
-    //clear weights
-    weights = {};
-
-    //add back sorted pairs
-    while (!pq.empty()) {
-      auto curr = pq.top();
-      weights.push_back(curr);
-      pq.pop();
-    }
-  }
+  //SORT WEIGHTS
+  // void sortWeights() {
+  //   //O(nlog(n))
+  //   //min heap
+  //   priority_queue<pair<int, float>, vector<pair<int, float>>, PairComp> pq;
+  //
+  //   //add (id, weight) to min heap
+  //   for (auto x : weights) {
+  //     pq.push(x);
+  //   }
+  //
+  //   //clear weights
+  //   weights = {};
+  //
+  //   //add back sorted pairs
+  //   while (!pq.empty()) {
+  //     auto curr = pq.top();
+  //     weights.push_back(curr);
+  //     pq.pop();
+  //   }
+  // }
 
   //from curl docs: https://curl.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
   struct memory {
@@ -116,36 +119,31 @@ class ParseData{
   public:
     ParseData(){srand(time(0));} //current time
 
-    float getTotalWeight(vector<pair<int,float>> finalWeights) {
-      float total = 0;
-      for (auto x : finalWeights) {
-        total += x.second;
-      }
-      return total;
-    }
 
-    int getTotalItems(vector<pair<int,float>> finalWeights) {
-      return finalWeights.size();
-    }
-
+//DEBUGGING ONLY =============================================================
     void printSizes() {
       cout << "NAMES MAP: " << namesMap.size() << endl;
       cout << "CAL WEIGHT: " << calWtMap.size() << endl;
-      cout << "WEIGHT VECTOR: " << weights.size() << endl;
+      cout << "WEIGHT VECTOR: " << foodItems.size() << endl;
     }
+//=================================================================================
 
     void resetParser() {
-      weights.clear();
+      foodItems.clear();
       namesMap.clear();
       calWtMap.clear();
       api_key.clear();
     }
 
+    vector<FoodItem> getFoodItems() {
+      return foodItems;
+    }
+
 
   //DEBUGGING ONLY==================================================================
     void printWeights() {
-      for (auto x : weights) {
-        cout << "ID: " << x.first << " " << "WEIGHT: "<< x.second << endl;
+      for (auto x : foodItems) {
+        cout << "ID: " << x.id << " " << "WEIGHT: "<< x.weight << endl;
       }
     }
 
@@ -155,8 +153,8 @@ class ParseData{
       for (auto it = calWtMap.begin(); it != calWtMap.end(); it++) {
         cout << "===============================" << endl;
         cout << "ID: " << it->first << endl;
-        cout << "CALS: " << it->second.first << endl;
-        cout << "WEIGHT: " << it->second.second << endl;
+        cout << "CALS: " << it->second.calories<< endl;
+        cout << "WEIGHT: " << it->second.weight << endl;
         cout << "===============================" << endl;
       }
 
@@ -226,14 +224,22 @@ class ParseData{
 
           namesMap[id] = names;
 
+          //Initialize FoodItem to add
+          FoodItem item{};
+          item.id = id;
           //get calories from file otherwise if not present just use random value
           getline(in, val, ',');
           try {
-            calWt.first = stof(val);
+            float cals = stof(val);
+            while (cals >= 1000) {
+              cals/=1000;
+            }
+            item.calories = cals;
+
           }
           catch (invalid_argument e) {
             float randCal = (rand() % 950) * 0.97;
-            calWt.first = randCal;
+            item.calories = randCal;
           }
 
           //weight
@@ -242,6 +248,7 @@ class ParseData{
           float weight;
           try {
             weight = stof(val);
+            item.weight = weight;
           }
           catch (invalid_argument e) {
           cout << "++++++++++++++++++++++++" << endl;
@@ -250,25 +257,17 @@ class ParseData{
           cout << "++++++++++++++++++++++++" << endl;
         }
 
-          if(!randomWeights){
-            calWt.second = weight;
-          }
-          else{
-            float randWt = (rand() % 7500) * 0.8;
-            calWt.second = randWt;
-            weight = randWt;
-          }
+        if (randomWeights) {
+          cout << "CHANGING WEIGHT" << endl;
+          float randWt = (rand() % 6231) * 0.8;
+          item.weight = randWt;
+        }
 
-          calWtMap[id] = calWt;
-
-          //(id, weight)
-          idWt.first = id;
-          idWt.second = weight;
-
-          weights.push_back(idWt);
+          calWtMap[id] = item;
+          foodItems.push_back(item);
       }
 
-      sortWeights();
+      // sortWeights();
     }
 
 
@@ -280,13 +279,10 @@ class ParseData{
          }
        }
 
-       cout << namesMap[1105904][1] << endl;
-       cout << namesMap[1105905][1] << endl;
+       // cout << namesMap[1105904][1] << endl;
+       // cout << namesMap[1105905][1] << endl;
     }
 
-    void setApiKey(string apiKey) {
-      api_key = apiKey;
-    }
 
     bool testApiKey(string apiKey) {
       //for testing if user's api key is valid

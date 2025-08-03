@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "parseData.h"
+#include "knapsackSolution.h"
 #include <chrono>
 #include <unordered_map>
 
@@ -13,15 +14,15 @@ using namespace std;
 
 struct ResourceManager{
     sf::Font mainFont;
-    vector<sf::Image> images;
     vector<sf::Texture> textures;
     vector<sf::Sprite> sprites;
 
     vector<string> optionStrings;
     vector<sf::Text> optionTexts;
 
-    unordered_map<string, sf::Text> greedyTexts;
-    unordered_map<string, sf::Text> dynamicTexts;
+    //text object, default string
+    unordered_map<string, pair<sf::Text, string>> greedyTexts;
+    unordered_map<string, pair<sf::Text, string>> dynamicTexts;
 
 
     ResourceManager(){
@@ -36,15 +37,15 @@ struct ResourceManager{
       sf::Text dynamicWeight("TOTAL WEIGHT(KG): ", mainFont, 30);
       sf::Text greedyCals("TOTAL CALORIES: ", mainFont, 30);
       sf::Text dynamicCals("TOTAL CALORIES: ", mainFont, 30);
-      greedyTexts["title"] = greedyTitle;
-      greedyTexts["time"] = greedyTime;
-      greedyTexts["weight"] = greedyWeight;
-      greedyTexts["cals"] = greedyCals;
+      greedyTexts["title"] = make_pair(greedyTitle, greedyTitle.getString());
+      greedyTexts["time"] = make_pair(greedyTime, greedyTime.getString());
+      greedyTexts["weight"] = make_pair(greedyWeight, greedyWeight.getString());;
+      greedyTexts["cals"] = make_pair(greedyCals, greedyCals.getString());
 
-      dynamicTexts["title"] = dynamicTitle;
-      dynamicTexts["time"] = dynamicTime;
-      dynamicTexts["weight"] = dynamicWeight;
-      dynamicTexts["cals"] = dynamicCals;
+      dynamicTexts["title"] = make_pair(dynamicTitle, dynamicTitle.getString());
+      dynamicTexts["time"] = make_pair(dynamicTime, dynamicTime.getString());
+      dynamicTexts["weight"] = make_pair(dynamicWeight, dynamicWeight.getString());
+      dynamicTexts["cals"] = make_pair(dynamicCals, dynamicCals.getString());
 
 
       //knapsack icon
@@ -86,8 +87,7 @@ enum class SCREEN{
 };
 
 enum class INPUT_MODE{
-  ENTER,
-  VALIDATE
+  ENTER
 };
 
 class UI {
@@ -101,8 +101,13 @@ class UI {
 
     float greedyMicroSeconds;
     float dynamicMicroSeconds;
+
     float greedyTotalWeight;
     float dpTotalWeight;
+
+    float greedyTotalCals;
+    float dpTotalCals;
+
     int greedyTotalItems;
     int dpTotalItems;
 
@@ -126,6 +131,7 @@ class UI {
     sf::Text dpResultText;
     sf::Text comparisonText;
     sf::Text fileOptionText;
+    sf::Text weightDefaultText;
 
     SCREEN currScreen;
     INPUT_MODE currInputMode;
@@ -192,6 +198,7 @@ class UI {
         resultsDisplay.setFont(rm.mainFont);
         userInputDisplay.setFont(rm.mainFont);
         infoText.setFont(rm.mainFont);
+        weightDefaultText.setFont(rm.mainFont);
 
         prompt.setCharacterSize(30);
         resultsDisplay.setCharacterSize(30);
@@ -200,11 +207,14 @@ class UI {
         userInputDisplay.setPosition(375, 230);
         userInputDisplay.setString(userInput);
         infoText.setCharacterSize(20);
+        weightDefaultText.setCharacterSize(35);
 
 
         prompt.setPosition(100,100);
         validationResponse.setPosition(155,280);
         infoText.setPosition(50,700);
+        weightDefaultText.setPosition(325, 400);
+        weightDefaultText.setString("DEFAULT = 5 KG");
 
         string info = "Press SPACE to return to Main Menu\nPress R to Reset\nPress ESC to Exit";
         infoText.setString(info);
@@ -227,6 +237,14 @@ class UI {
         userInput.clear();
         weightLimit = 5;
         apiKey.clear();
+
+        //set strings to default strings
+        for (auto it  = rm.greedyTexts.begin(); it != rm.greedyTexts.end(); it++) {
+          it->second.first.setString(it->second.second);
+        }
+        for (auto it  = rm.dynamicTexts.begin(); it != rm.dynamicTexts.end(); it++) {
+          it->second.first.setString(it->second.second);
+        }
 
         cout <<"WEIGHT LIMIT AFTER RESET: " << weightLimit << endl;
         cout << "API KEY AFTER RESET: " << apiKey << endl;
@@ -278,7 +296,6 @@ void UI::StartUI() {
             windowTitle.setPosition(270, 140);
             userInput.clear();
             currScreen = SCREEN::INPUT;
-            currInputMode = INPUT_MODE::VALIDATE;
             selectedOption = 1;
             optionStatus[0] = true;
             sf::Event bufferEvent;
@@ -294,7 +311,7 @@ void UI::StartUI() {
               parser.resetParser();
               optionStatus[2] = false;
             }
-            parser.readCsv("TESTFILE.csv", false);
+            parser.readCsv("food_data.csv", false);
             parser.printSizes();
             optionStatus[1] = true;
           }
@@ -307,7 +324,8 @@ void UI::StartUI() {
               parser.resetParser();
               optionStatus[1] = false;
             }
-            parser.readCsv("TESTFILE.csv", false);
+            parser.readCsv("TESTFILE.csv", true);
+            parser.printMaps();
             parser.printSizes();
             optionStatus[2] = true;
           }
@@ -317,7 +335,6 @@ void UI::StartUI() {
             windowTitle.setString("SET WEIGHT LIMIT");
             userInput.clear();
             currScreen = SCREEN::INPUT;
-            currInputMode = INPUT_MODE::VALIDATE;
             optionStatus[3] = true;
             selectedOption = 4;
             cout << "USER INPUT BEFORE INPUT WINDOW: " << userInput << endl;
@@ -328,6 +345,10 @@ void UI::StartUI() {
           }
 
           if (event.key.code == sf::Keyboard::Num5) {
+            //do not run if no dataset loaded
+            if (!optionStatus[1] && !optionStatus[2]) {
+              continue;
+            }
             //run greedy solution
             cout << "GREEDY" << endl;
             auto greedyStart = chrono::high_resolution_clock::now();
@@ -340,47 +361,56 @@ void UI::StartUI() {
             // greedyTotalWeight = parser.getTotalWeight(finalWeights);
 
             optionStatus[4] = true;
-            rm.greedyTexts["title"].setString("GREEDY:");
-            rm.greedyTexts["title"].setFillColor(sf::Color::White);
+            rm.greedyTexts["title"].first.setString("GREEDY:");
+            rm.greedyTexts["title"].first.setFillColor(sf::Color::White);
 
-            string currString = rm.greedyTexts["time"].getString();
+            string currString = rm.greedyTexts["time"].first.getString();
             currString += "\n\n" + to_string(greedyMicroSeconds) + "  us";
-            rm.greedyTexts["time"].setString(currString);
+            rm.greedyTexts["time"].first.setString(currString);
 
-            string currWeight = rm.greedyTexts["weight"].getString();
+            string currWeight = rm.greedyTexts["weight"].first.getString();
             currWeight += "\n\n" + to_string(greedyTotalWeight);
-            rm.greedyTexts["weight"].setString(currWeight);
+            rm.greedyTexts["weight"].first.setString(currWeight);
 
-            string currCals = rm.greedyTexts["cals"].getString();
+            string currCals = rm.greedyTexts["cals"].first.getString();
             // currCals += "\n\n" + to_string(getTotalCals(finalWeights));
-            rm.greedyTexts["cals"].setString(currCals);
+            rm.greedyTexts["cals"].first.setString(currCals);
           }
 
           if (event.key.code == sf::Keyboard::Num6) {
+            //do not run if no dataset
+            if (!optionStatus[1] && !optionStatus[2]) {
+              continue;
+            }
             //run dp solution
             cout << "DYNAMIC" << endl;
             auto dpStart = chrono::high_resolution_clock::now();
             //call dp
             auto dpEnd = chrono::high_resolution_clock::now();
+            cout << "WEIGHT LIMIT PARAMETER: " << weightLimit  << endl;
+            //weight limit * 1000 bc need to convert to grams
+            Result dpResult = runKnapsackDP(parser.getFoodItems(), weightLimit * 1000);
             auto dpDuration = chrono::duration_cast<chrono::microseconds>(dpEnd - dpStart);
             dynamicMicroSeconds = dpDuration.count();
-            // dpTotalWeight = parser.getTotalWeight(finalWeights);
+            //weights in grams in csv so divide by 1000 when displaying as kg
+            dpTotalWeight = dpResult.totalWeight/1000.00;
+            dpTotalCals = dpResult.totalCalories;
 
             optionStatus[5] = true;
-            rm.dynamicTexts["title"].setString("DYNAMIC:");
-            rm.dynamicTexts["title"].setFillColor(sf::Color::White);
+            rm.dynamicTexts["title"].first.setString("DYNAMIC:");
+            rm.dynamicTexts["title"].first.setFillColor(sf::Color::White);
 
-            string currString = rm.dynamicTexts["time"].getString();
+            string currString = rm.dynamicTexts["time"].first.getString();
             currString += "\n\n" + to_string(dynamicMicroSeconds) + "  us";
-            rm.dynamicTexts["time"].setString(currString);
+            rm.dynamicTexts["time"].first.setString(currString);
 
-            string currWeight = rm.dynamicTexts["weight"].getString();
+            string currWeight = rm.dynamicTexts["weight"].first.getString();
             currWeight += "\n\n" + to_string(dpTotalWeight);
-            rm.dynamicTexts["weight"].setString(currWeight);
+            rm.dynamicTexts["weight"].first.setString(currWeight);
 
-            string currCals = rm.dynamicTexts["cals"].getString();
-            // currCals += "\n\n" + to_string(getTotalCals(finalWeights));
-            rm.dynamicTexts["cals"].setString(currCals);
+            string currCals = rm.dynamicTexts["cals"].first.getString();
+            currCals += "\n\n" + to_string(dpTotalCals);
+            rm.dynamicTexts["cals"].first.setString(currCals);
           }
         }
 
@@ -406,7 +436,7 @@ void UI::StartUI() {
             if (event.key.code == sf::Keyboard::Enter) {
               apiKey = "";
               cout << "CURRENT API KEY: START" << userInput << "END" << endl;
-
+              //if key invalid clear user input and allow retry but if valid set the key and complete option
               bool works = parser.testApiKey(userInput);
               if (!works) {
                 cout << "INVALID API KEY" << endl;
@@ -440,15 +470,12 @@ void UI::StartUI() {
             cout << "INPUT NOW API: " << userInput << endl;
             userInputDisplay.setString(userInput);
           }
-
-
-
         }
 
         if (selectedOption == 4) {
           // cout << "ENTERING LIMIT" << endl;
           windowTitle.setString("SET WEIGHT LIMIT");
-
+          //press enter to submit input
           if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Enter) {
               weightLimit = stof(userInput);
@@ -467,7 +494,7 @@ void UI::StartUI() {
           else if (event.type == sf::Event::TextEntered && currInputMode == INPUT_MODE::ENTER) {
             //must be digit for weight limit
             cout << "ENTERING TEXT" << endl;
-            if (event.text.unicode >= '0' && event.text.unicode <= '9') {
+            if (event.text.unicode >= '0' && event.text.unicode <= '9' || event.text.unicode == 46) {
               userInput += static_cast<char>(event.text.unicode);
               cout << "INPUT NOW: " << userInput << endl;
             }
@@ -478,6 +505,7 @@ void UI::StartUI() {
         }
       }
       else if (currScreen == SCREEN::DISPLAY_RESULTS) {
+        //if both greedy and dp run then can get files of items chosen
           if (optionStatus[4] && optionStatus[5]) {
             if (event.type == sf::Event::KeyPressed) {
               if (event.key.code == sf::Keyboard::W) {
@@ -496,6 +524,7 @@ void UI::StartUI() {
               }
             }
           }
+          //if neither greedy nor dp
           if (!optionStatus[4] && !optionStatus[5]) {
             windowTitle.setString("RESULTS\n\n\n\n");
             resultsDisplay.setString("                          NO RESULTS TO DISPLAY.\nPLEASE RUN GREEDY AND/OR DYNAMIC PROGRAMMING ALGORITHMS.\nNOTE: YOU MUST RUN BOTH ALGORITHMS TO SEE A COMPARISON.");
@@ -505,25 +534,15 @@ void UI::StartUI() {
           else {
             windowTitle.setString("RESULTS");
             resultsDisplay.setString("");
-            rm.greedyTexts["title"].setPosition(50,200);
-            rm.greedyTexts["time"].setPosition(50,250);
-            rm.greedyTexts["weight"].setPosition(50,375);
-            rm.greedyTexts["cals"].setPosition(50, 500);
+            rm.greedyTexts["title"].first.setPosition(50,200);
+            rm.greedyTexts["time"].first.setPosition(50,250);
+            rm.greedyTexts["weight"].first.setPosition(50,375);
+            rm.greedyTexts["cals"].first.setPosition(50, 500);
 
-            rm.dynamicTexts["title"].setPosition(625,200);
-            rm.dynamicTexts["time"].setPosition(625,250);
-            rm.dynamicTexts["weight"].setPosition(625,375);
-            rm.dynamicTexts["cals"].setPosition(625, 500);
-          }
-
-            //show greed
-          if (optionStatus[4]) {
-
-          }
-
-          //show dynamic
-          if (optionStatus[5]) {
-
+            rm.dynamicTexts["title"].first.setPosition(625,200);
+            rm.dynamicTexts["time"].first.setPosition(625,250);
+            rm.dynamicTexts["weight"].first.setPosition(625,375);
+            rm.dynamicTexts["cals"].first.setPosition(625, 500);
           }
 
           windowTitle.setPosition( 350, 140);
@@ -531,31 +550,32 @@ void UI::StartUI() {
 
   }
 
-
+  //conditional drawing
     mainWindow.clear(sf::Color(117, 161, 155));
     if (currScreen == SCREEN::DISPLAY_RESULTS) {
       mainWindow.draw(resultsDisplay);
       if (optionStatus[4] || optionStatus[5]) {
         //DISPLAY GREEDY
         if (!optionStatus[4]) {
-          mainWindow.draw(rm.greedyTexts["title"]);
+          mainWindow.draw(rm.greedyTexts["title"].first);
         }
         if (optionStatus[4]) {
-          mainWindow.draw(rm.greedyTexts["title"]);
-          mainWindow.draw(rm.greedyTexts["time"]);
-          mainWindow.draw(rm.greedyTexts["weight"]);
-          mainWindow.draw(rm.greedyTexts["cals"]);
+          mainWindow.draw(rm.greedyTexts["title"].first);
+          mainWindow.draw(rm.greedyTexts["time"].first);
+          mainWindow.draw(rm.greedyTexts["weight"].first);
+          mainWindow.draw(rm.greedyTexts["cals"].first);
         }
 
+        //DISPLAY DP
         if (!optionStatus[5]) {
-          mainWindow.draw(rm.dynamicTexts["title"]);
+          mainWindow.draw(rm.dynamicTexts["title"].first);
         }
 
         if (optionStatus[5]) {
-          mainWindow.draw(rm.dynamicTexts["title"]);
-          mainWindow.draw(rm.dynamicTexts["time"]);
-          mainWindow.draw(rm.dynamicTexts["weight"]);
-          mainWindow.draw(rm.dynamicTexts["cals"]);
+          mainWindow.draw(rm.dynamicTexts["title"].first);
+          mainWindow.draw(rm.dynamicTexts["time"].first);
+          mainWindow.draw(rm.dynamicTexts["weight"].first);
+          mainWindow.draw(rm.dynamicTexts["cals"].first);
         }
 
         if (optionStatus[4] && optionStatus[5]) {
@@ -566,28 +586,35 @@ void UI::StartUI() {
     }
 
     else if (currScreen == SCREEN::INPUT) {
+      //API KEY
       if (selectedOption == 1) {
         int stars = userInput.length();
+        //hide api key input
         userInputDisplay.setString(string(stars, '*'));
         userInputDisplay.setCharacterSize(50);
         mainWindow.draw(userInputDisplay);
+
         if (!validKey) {
           validationResponse.setFillColor(sf::Color(214, 101, 15));
           validationResponse.setString(" \t\t\t\t\t\tINVALID API KEY.\nPLEASE ENTER VALID KEY OR RETURN TO MENU.\nNOTE: API KEY NEEDED TO OBTAIN NAMES OF ITEMS CHOSEN\n(DEFAULT IS PRODUCT ID).");
           mainWindow.draw(validationResponse);
         }
       }
+
+      //SETTING WEIGHT LIMIT
       if (selectedOption == 4) {
         userInputDisplay.setString(userInput);
         mainWindow.draw(userInputDisplay);
         mainWindow.draw(unitText);
+        mainWindow.draw(weightDefaultText);
       }
     }
 
     else if (currScreen == SCREEN::OPTIONS) {
-
       windowTitle.setString("MAIN MENU");
       int  i = 0;
+      //view results never green, api key option only green/complete when valid key added
+      //color green if completed
       for (auto opt : rm.optionTexts) {
         if (optionStatus[i] && i != 6) {
           opt.setFillColor(sf::Color::Green);
@@ -596,6 +623,12 @@ void UI::StartUI() {
           }
           else if (i == 0 && apiKey.empty()) {
             opt.setFillColor(sf::Color::White);
+          }
+        }
+        //if dataset not loaded both greedy and dp options gray/will not run the solutions
+        else if (!optionStatus[1] && !optionStatus[2]) {
+          if (i == 4 || i == 5) {
+            opt.setFillColor(sf::Color(128,128,128));
           }
         }
         else {
