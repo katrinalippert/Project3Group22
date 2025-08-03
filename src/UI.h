@@ -545,7 +545,7 @@ void UI::StartUI() {
                   // parser.createItemTxt(greedyResult, 0, apiKey);
                   parser.createItemTxt(dpResult, 1, apiKey);
                 }
-                cout << "VALID W PRESS " << endl;
+                // cout << "VALID W PRESS " << endl;
 
 
               }
