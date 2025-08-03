@@ -272,8 +272,8 @@ class UI {
           it->second.first.setString(it->second.second);
         }
 
-        cout <<"WEIGHT LIMIT AFTER RESET: " << weightLimit << endl;
-        cout << "API KEY AFTER RESET: " << apiKey << endl;
+//        cout <<"WEIGHT LIMIT AFTER RESET: " << weightLimit << endl;
+//        cout << "API KEY AFTER RESET: " << apiKey << endl;
       }
 
 
@@ -329,6 +329,12 @@ void UI::StartUI() {
               optionStatus[2] = false;
               optionStatus[4] = false;
               optionStatus[5] = false;
+              for (auto it  = rm.greedyTexts.begin(); it != rm.greedyTexts.end(); it++) {
+                it->second.first.setString(it->second.second);
+              }
+              for (auto it  = rm.dynamicTexts.begin(); it != rm.dynamicTexts.end(); it++) {
+                it->second.first.setString(it->second.second);
+              }
             }
             parser.readCsv("food_data.csv", false);
             parser.printSizes();
@@ -344,9 +350,14 @@ void UI::StartUI() {
               optionStatus[1] = false;
               optionStatus[4] = false;
               optionStatus[5] = false;
+              for (auto it  = rm.greedyTexts.begin(); it != rm.greedyTexts.end(); it++) {
+                it->second.first.setString(it->second.second);
+              }
+              for (auto it  = rm.dynamicTexts.begin(); it != rm.dynamicTexts.end(); it++) {
+                it->second.first.setString(it->second.second);
+              }
             }
             parser.readCsv("food_data.csv", true);
-            // parser.printMaps();
             parser.printSizes();
             optionStatus[2] = true;
           }
@@ -512,6 +523,14 @@ void UI::StartUI() {
               weightLimit = stof(userInput);
               cout << "WEIGHT LIMIT: " << weightLimit << endl;
               currScreen = SCREEN::OPTIONS;
+              optionStatus[4] = false;
+              optionStatus[5] = false;
+              for (auto it  = rm.greedyTexts.begin(); it != rm.greedyTexts.end(); it++) {
+                it->second.first.setString(it->second.second);
+              }
+              for (auto it  = rm.dynamicTexts.begin(); it != rm.dynamicTexts.end(); it++) {
+                it->second.first.setString(it->second.second);
+              }
             }
             //delete last character of string
             if (event.key.code == sf::Keyboard::BackSpace) {

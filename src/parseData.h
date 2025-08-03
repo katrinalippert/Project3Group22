@@ -103,7 +103,7 @@ class ParseData{
     void printSizes() {
       cout << "NAMES MAP: " << namesMap.size() << endl;
       cout << "CAL WEIGHT: " << calWtMap.size() << endl;
-      cout << "WEIGHT VECTOR: " << foodItems.size() << endl;
+      cout << "FOOD ITEMS: " << foodItems.size() << endl;
     }
 //=================================================================================
 
