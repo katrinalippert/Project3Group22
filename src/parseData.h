@@ -32,36 +32,6 @@ class ParseData{
 
   string api_key = "";
 
-  // struct PairComp {
-  //   //ascending order
-  //   bool operator()(const pair<int,float>& p1, const pair<int,float>& p2) {
-  //     return p1.second > p2.second;
-  //   }
-  // };
-
-
-  //SORT WEIGHTS
-  // void sortWeights() {
-  //   //O(nlog(n))
-  //   //min heap
-  //   priority_queue<pair<int, float>, vector<pair<int, float>>, PairComp> pq;
-  //
-  //   //add (id, weight) to min heap
-  //   for (auto x : weights) {
-  //     pq.push(x);
-  //   }
-  //
-  //   //clear weights
-  //   weights = {};
-  //
-  //   //add back sorted pairs
-  //   while (!pq.empty()) {
-  //     auto curr = pq.top();
-  //     weights.push_back(curr);
-  //     pq.pop();
-  //   }
-  // }
-
   //from curl docs: https://curl.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
   struct memory {
     char *response;
@@ -73,51 +43,60 @@ class ParseData{
     return size * nmemb;
   }
 
-  string getName(int id, string apiKey){
-    CURL* curl;
-    CURLcode res;
-    string body;
 
-    string url = "https://api.nal.usda.gov/fdc/v1/food/" + to_string(id) + "?api_key=" + apiKey;
-
-    curl_global_init(CURL_GLOBAL_ALL);
-    curl = curl_easy_init();
-
-    if (curl) {
-      //set url for get request
-      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-      curl_easy_setopt(curl, CURLOPT_CAINFO, "dependencies/curl/curl-8.15.0_4-win64-mingw/dep/cacert/cacert.pem");
-
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
-
-      res = curl_easy_perform(curl);
-
-      //check if request successful
-      if (res != CURLE_OK) {
-        cout << "ERROR WITH REQUEST" << endl;
-        cout << curl_easy_strerror(res) << endl;
-        curl_easy_cleanup(curl);
-        curl_global_cleanup();
-        body.clear();
-        return "";
-      }
-
-      auto bodyJSON = nlohmann::json::parse(body);
-      curl_easy_cleanup(curl);
-      curl_global_cleanup();
-
-      string name = bodyJSON["description"];
-
-      return name;
-    }
-
-    return "";
-  }
 
   public:
     ParseData(){srand(time(0));} //current time
+
+    string getCompanyName(int id) {
+      if (!namesMap.empty()) {
+        return namesMap[id][0];
+      }
+      return "";
+    }
+
+  string getName(int id, string apiKey){
+      CURL* curl;
+      CURLcode res;
+      string body;
+
+      string url = "https://api.nal.usda.gov/fdc/v1/food/" + to_string(id) + "?api_key=" + apiKey;
+
+      curl_global_init(CURL_GLOBAL_ALL);
+      curl = curl_easy_init();
+
+      if (curl) {
+        //set url for get request
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_CAINFO, "dependencies/curl/curl-8.15.0_4-win64-mingw/dep/cacert/cacert.pem");
+
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
+
+        res = curl_easy_perform(curl);
+
+        //check if request successful
+        if (res != CURLE_OK) {
+          cout << "ERROR WITH REQUEST" << endl;
+          cout << curl_easy_strerror(res) << endl;
+          curl_easy_cleanup(curl);
+          curl_global_cleanup();
+          body.clear();
+          return "";
+        }
+
+        auto bodyJSON = nlohmann::json::parse(body);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+
+        string name = bodyJSON["description"];
+
+        return name;
+      }
+
+      return "";
+    }
 
 
 //DEBUGGING ONLY =============================================================
@@ -258,7 +237,7 @@ class ParseData{
         }
 
         if (randomWeights) {
-          cout << "CHANGING WEIGHT" << endl;
+          // cout << "CHANGING WEIGHT" << endl;
           float randWt = (rand() % 6231) * 0.8;
           item.weight = randWt;
         }
@@ -289,13 +268,14 @@ class ParseData{
       string testResult = "";
       try {
         string testResult = getName(1105904, apiKey);
+        return testResult != "";
         cout << "RESULT : " << testResult << endl;
       }
       catch (nlohmann::json::exception e) {
         return false;
       }
       //getName returns empty string if unsuccessful so if test result is empty user api key invalid
-      return true;
+      return false;
     }
 
     void createItemTxt(Result& result, int choice, string apiKey) {

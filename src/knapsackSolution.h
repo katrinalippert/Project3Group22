@@ -58,7 +58,7 @@ Result runKnapsackDP(const std::vector<FoodItem>& foodItems, float weightLimit){
             result.selectedItems.push_back(foodItems[i - 1]);
             result.totalCalories += foodItems[i - 1].calories;
             result.totalWeight += foodItems[i - 1].weight;
-            w -= static_cast<int>(foodItems[i - 1].weight);
+            w -= static_cast<int>(round(foodItems[i - 1].weight));
         }
     }
     //Reverse sorting the results
