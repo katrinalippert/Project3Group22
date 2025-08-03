@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 #include <iostream>
+
 using namespace std;
 
 struct FoodItem {
@@ -64,4 +65,30 @@ Result runKnapsackDP(const std::vector<FoodItem>& foodItems, float weightLimit){
     std::reverse(result.selectedItems.begin(), result.selectedItems.end());
     return result;
 }
+// greedy
+void sortByRatio(std::vector<FoodItem>& foodItems) {
+    std::sort(foodItems.begin(), foodItems.end(),
+        [](const FoodItem& a, const FoodItem& b) {
+            float ratioA = (a.weight > 0) ? (a.calories / a.weight) : 0.0f;
+            float ratioB = (b.weight > 0) ? (b.calories / b.weight) : 0.0f;
+            return ratioA > ratioB;
+        });
+}
+
+Result runKnapsackGreedy(vector<FoodItem> foodItems, float weightLimit){
+    sortByRatio(foodItems);
+
+    Result result;
+    for (size_t i = 0; i < foodItems.size(); ++i) {
+        if (result.totalWeight + foodItems[i].weight <= weightLimit) {
+            result.selectedItems.push_back(foodItems[i]);
+            result.totalCalories += foodItems[i].calories;
+            result.totalWeight += foodItems[i].weight;
+        }
+    }
+    return result;
+}
+
 #endif //KNAPSACKSOLUTION_H
+
+
