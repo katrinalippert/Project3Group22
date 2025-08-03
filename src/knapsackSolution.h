@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -22,17 +23,15 @@ struct Result {
     float totalWeight = 0;
 };
 
-
-
 Result runKnapsackDP(const std::vector<FoodItem>& foodItems, float weightLimit){
     int n = foodItems.size();
-    int W = static_cast<int>(weightLimit);
+    int W = static_cast<int>(weightLimit * 1000.0f);
 
     std::vector<std::vector<float>> dp(n + 1, std::vector<float>(W + 1, 0));
     std::vector<std::vector<bool>> keep(n + 1, std::vector<bool>(W + 1, false));
     //Create & fill up the table with solutions
     for (int i = 1; i <= n; ++i) {
-        int wt = static_cast<int>(round(foodItems[i - 1].weight));
+        int wt = static_cast<int>(foodItems[i - 1].weight * 1000.0f);
         float cal = foodItems[i - 1].calories;
         for (int w = 0; w <= W; ++w) {
             if (wt <= w) {
@@ -49,23 +48,27 @@ Result runKnapsackDP(const std::vector<FoodItem>& foodItems, float weightLimit){
             }
         }
     }
-
-    //Backtracking part
+    // Backtracking part
     Result result;
     int w = W;
+    int totalWeightGrams = 0;
     for (int i = n; i > 0; --i) {
         if (keep[i][w]) {
-            result.selectedItems.push_back(foodItems[i - 1]);
-            result.totalCalories += foodItems[i - 1].calories;
-            result.totalWeight += foodItems[i - 1].weight;
-            w -= static_cast<int>(round(foodItems[i - 1].weight));
+            int itemWeight = static_cast<int>(foodItems[i - 1].weight * 1000.0f);
+            if (totalWeightGrams + itemWeight <= W) {   // hard cap check
+                result.selectedItems.push_back(foodItems[i - 1]);
+                result.totalCalories += foodItems[i - 1].calories;
+                totalWeightGrams += itemWeight;
+                w -= itemWeight;
+            }
         }
     }
-    //Reverse sorting the results
+    // Reverse sorting the results
     std::reverse(result.selectedItems.begin(), result.selectedItems.end());
+    result.totalWeight = totalWeightGrams / 1000.0f;
     return result;
 }
-// greedy
+//greedy
 void sortByRatio(std::vector<FoodItem>& foodItems) {
     std::sort(foodItems.begin(), foodItems.end(),
         [](const FoodItem& a, const FoodItem& b) {
@@ -90,5 +93,3 @@ Result runKnapsackGreedy(vector<FoodItem> foodItems, float weightLimit){
 }
 
 #endif //KNAPSACKSOLUTION_H
-
-
