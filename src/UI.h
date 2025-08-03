@@ -393,11 +393,8 @@ void UI::StartUI() {
             //run dp solution
             cout << "DYNAMIC" << endl;
             auto dpStart = chrono::high_resolution_clock::now();
-            //call dp
-            auto dpEnd = chrono::high_resolution_clock::now();
-            cout << "WEIGHT LIMIT PARAMETER: " << weightLimit  << endl;
-            //weight limit * 1000 bc need to convert to grams
             Result dpResult = runKnapsackDP(parser.getFoodItems(), weightLimit * 1000);
+            auto dpEnd = chrono::high_resolution_clock::now();
             auto dpDuration = chrono::duration_cast<chrono::microseconds>(dpEnd - dpStart);
             dynamicMicroSeconds = dpDuration.count();
             //weights in grams in csv so divide by 1000 when displaying as kg
