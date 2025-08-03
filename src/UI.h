@@ -350,26 +350,35 @@ void UI::StartUI() {
           }
 
           if (event.key.code == sf::Keyboard::Num5) {
-            //do not run if no dataset loaded
+            // Do not run if no dataset loaded
             if (!optionStatus[1] && !optionStatus[2]) {
               continue;
             }
-            //run greedy solution
+
             cout << "GREEDY" << endl;
             auto greedyStart = chrono::high_resolution_clock::now();
-            //call greedy
+
+            // Call greedy function
+            Result greedyResult = runKnapsackGreedy(parser.getFoodItems(), weightLimit * 1000);
+
             auto greedyEnd = chrono::high_resolution_clock::now();
             auto greedyDuration = chrono::duration_cast<chrono::microseconds>(greedyEnd - greedyStart);
             greedyMicroSeconds = greedyDuration.count();
-            //set total weight
-            //final weights is vector<pair<int,float>> (id, weight)
-            // greedyTotalWeight = parser.getTotalWeight(finalWeights);
 
+            // Store results for display
+            greedyTotalWeight = greedyResult.totalWeight / 1000.0f; // convert grams -> kg for display
+            greedyTotalCals = greedyResult.totalCalories;
+            greedyTotalItems = (int)greedyResult.selectedItems.size();
+
+            // Mark greedy as completed
             optionStatus[4] = true;
+
+            // Update UI texts
             rm.greedyTexts["title"].first.setString("GREEDY:");
             rm.greedyTexts["title"].first.setFillColor(sf::Color::White);
 
             string currString = rm.greedyTexts["time"].first.getString();
+
             ostringstream ss;
             ss << currString << "\n\n" << fixed << setprecision(2) << greedyMicroSeconds << " us";
             rm.greedyTexts["time"].first.setString(ss.str());
@@ -382,8 +391,10 @@ void UI::StartUI() {
             ss.str("");
 
             string currCals = rm.greedyTexts["cals"].first.getString();
+
             ss << currCals << "\n\n" << fixed << setprecision(2) << greedyTotalCals;
             rm.greedyTexts["cals"].first.setString(ss.str());
+
           }
 
           if (event.key.code == sf::Keyboard::Num6) {
@@ -394,11 +405,13 @@ void UI::StartUI() {
             //run dp solution
             cout << "DYNAMIC" << endl;
             auto dpStart = chrono::high_resolution_clock::now();
+
             //call dp
             auto dpEnd = chrono::high_resolution_clock::now();
             cout << "WEIGHT LIMIT PARAMETER: " << weightLimit  << endl;
             //weight limit * 1000 bc need to convert to grams
             dpResult = runKnapsackDP(parser.getFoodItems(), weightLimit * 1000);
+
             auto dpDuration = chrono::duration_cast<chrono::microseconds>(dpEnd - dpStart);
             dynamicMicroSeconds = dpDuration.count();
             //weights in grams in csv so divide by 1000 when displaying as kg
