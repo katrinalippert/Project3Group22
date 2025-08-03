@@ -32,7 +32,7 @@ Result runKnapsackDP(const std::vector<FoodItem>& foodItems, float weightLimit){
     std::vector<std::vector<bool>> keep(n + 1, std::vector<bool>(W + 1, false));
     //Create & fill up the table with solutions
     for (int i = 1; i <= n; ++i) {
-        int wt = static_cast<int>(foodItems[i - 1].weight);
+        int wt = static_cast<int>(round(foodItems[i - 1].weight));
         float cal = foodItems[i - 1].calories;
         for (int w = 0; w <= W; ++w) {
             if (wt <= w) {

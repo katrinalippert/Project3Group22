@@ -323,7 +323,7 @@ void UI::StartUI() {
             userInput.clear();
             currScreen = SCREEN::INPUT;
             selectedOption = 1;
-            optionStatus[0] = true;
+            // optionStatus[0] = true;
             sf::Event bufferEvent;
             while (mainWindow.pollEvent(bufferEvent)) {}
             break;
@@ -336,6 +336,8 @@ void UI::StartUI() {
             if (optionStatus[2]) {
               parser.resetParser();
               optionStatus[2] = false;
+              optionStatus[4] = false;
+              optionStatus[5] = false;
             }
             parser.readCsv("food_data.csv", false);
             parser.printSizes();
@@ -349,6 +351,8 @@ void UI::StartUI() {
             if (optionStatus[1]) {
               parser.resetParser();
               optionStatus[1] = false;
+              optionStatus[4] = false;
+              optionStatus[5] = false;
             }
             parser.readCsv("food_data.csv", true);
             // parser.printMaps();
@@ -487,7 +491,7 @@ void UI::StartUI() {
                 validKey = false;
                 continue;
               }
-
+              optionStatus[0] = true;
               validKey = true;
               apiKey = userInput;
               cout << "API KEY FINAL: " << apiKey << endl;
@@ -583,7 +587,7 @@ void UI::StartUI() {
             if (event.type == sf::Event::KeyPressed) {
               if (event.key.code == sf::Keyboard::W) {
                 //create greedy and dynamic txt files listing items chosen
-                if (apiKey.empty() || !validKey) {
+
                   ofstream outFileGreedy("greedyItemsChosen.txt");
                   ofstream outFileDp("dynamicItemsChosen.txt");
                   //default to product ids
@@ -606,9 +610,6 @@ void UI::StartUI() {
                     }
                   }
 
-                }
-
-                // cout << "VALID W PRESS " << endl;
               }
             }
           }
@@ -721,10 +722,10 @@ void UI::StartUI() {
       //view results never green, api key option only green/complete when valid key added
       //color green if completed
       for (auto opt : rm.optionTexts) {
-        if (i == 7 && (!validKey || apiKey.empty())) {
+        if (i == 7 && !optionStatus[0]) {
           opt.setFillColor(sf::Color(128,128,128));
         }
-        if (optionStatus[i] && i != 6 && i != 7) {
+        else if (optionStatus[i] && i != 6 && i != 7) {
           opt.setFillColor(sf::Color::Green);
           if (i == 0 && !validKey) {
             opt.setFillColor(sf::Color(237, 137, 7));
