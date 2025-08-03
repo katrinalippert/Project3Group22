@@ -383,12 +383,12 @@ void UI::StartUI() {
             cout << "GREEDY" << endl;
             auto greedyStart = chrono::high_resolution_clock::now();
             //call greedy
-            greedyResult = runKnapsackGreedy(parser.getFoodItems(), weightLimit * 1000);
+            greedyResult = runKnapsackGreedy(parser.getFoodItems(), weightLimit);
             auto greedyEnd = chrono::high_resolution_clock::now();
             auto greedyDuration = chrono::duration_cast<chrono::microseconds>(greedyEnd - greedyStart);
             greedyMicroSeconds = greedyDuration.count();
             //set total weight (divide by 1000 bc result weight is in grams, convert to kg)
-            greedyTotalWeight = greedyResult.totalWeight/1000.00;
+            greedyTotalWeight = greedyResult.totalWeight;
             greedyTotalCals = greedyResult.totalCalories;
 
             optionStatus[4] = true;
@@ -422,7 +422,7 @@ void UI::StartUI() {
             auto dpStart = chrono::high_resolution_clock::now();
             //call dp
             //weight limit * 1000 bc need to convert to grams
-            int limitKG = static_cast<int>(weightLimit) * 1000;
+            int limitKG = static_cast<int>(weightLimit);
             cout << "WEIGHT LIMIT PARAMETER: " << limitKG  << endl;
             dpResult = runKnapsackDP(parser.getFoodItems(), limitKG);
 
@@ -430,7 +430,7 @@ void UI::StartUI() {
             auto dpDuration = chrono::duration_cast<chrono::microseconds>(dpEnd - dpStart);
             dynamicMicroSeconds = dpDuration.count();
             //weights in grams in csv so divide by 1000 when displaying as kg
-            dpTotalWeight = dpResult.totalWeight/1000.00;
+            dpTotalWeight = dpResult.totalWeight;
             dpTotalCals = dpResult.totalCalories;
 
             optionStatus[5] = true;
