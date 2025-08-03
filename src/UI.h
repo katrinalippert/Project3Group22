@@ -70,8 +70,9 @@ struct ResourceManager{
         optionStrings.push_back("5. Run Greedy solution\n\n");
         optionStrings.push_back("6. Run Dynamic Programming solution\n\n");
         optionStrings.push_back("7. View Results");
+        optionStrings.push_back("8. Get Name By ID");
 
-        sf::Text o1,o2,o3,o4,o5,o6,o7;
+        sf::Text o1,o2,o3,o4,o5,o6,o7,o8;
         optionTexts.push_back(o1);
         optionTexts.push_back(o2);
         optionTexts.push_back(o3);
@@ -79,6 +80,7 @@ struct ResourceManager{
         optionTexts.push_back(o5);
         optionTexts.push_back(o6);
         optionTexts.push_back(o7);
+        optionTexts.push_back(o8);
     }
 };
 
@@ -137,6 +139,8 @@ class UI {
     sf::Text comparisonText;
     sf::Text fileOptionText;
     sf::Text weightDefaultText;
+    sf::Text nameText;
+
 
     SCREEN currScreen;
     INPUT_MODE currInputMode;
@@ -148,12 +152,12 @@ class UI {
         currScreen = SCREEN::OPTIONS;
         currInputMode = INPUT_MODE::ENTER;
         //all options incomplete
-        for(int i = 0; i < 7; i++){
+        for(int i = 0; i < 8; i++){
           optionStatus.push_back(false);
         }
 
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 8; i++) {
           rm.optionTexts[i].setString(rm.optionStrings[i]);
           rm.optionTexts[i].setFont(rm.mainFont);
           rm.optionTexts[i].setFillColor(sf::Color::White);
@@ -174,6 +178,12 @@ class UI {
         fileOptionText.setCharacterSize(35);
         fileOptionText.setPosition(200,640);
         fileOptionText.setString("PRESS W TO CREATE FILES LISTING ITEMS CHOSEN");
+
+        nameText.setFont(rm.mainFont);
+        nameText.setCharacterSize(40);
+        nameText.setPosition(250, 400);
+        nameText.setString("PRODUCT NAME: ");
+
 
         //main menu text
         windowTitle.setFont(rm.mainFont);
@@ -226,6 +236,17 @@ class UI {
       }
 
       void StartUI();
+
+      bool isDpOptimalRatio() {
+        //calories/weight
+        float greedyRatio = greedyResult.totalCalories / greedyResult.totalWeight;
+        float dpRatio = dpResult.totalCalories / dpResult.totalWeight;
+        float overall = dpRatio / greedyRatio;
+        if (overall < 1) {
+          return false;
+        }
+        return true;
+      }
 
       //press R to reset
       void resetUI(){
@@ -329,8 +350,8 @@ void UI::StartUI() {
               parser.resetParser();
               optionStatus[1] = false;
             }
-            parser.readCsv("TESTFILE.csv", true);
-            parser.printMaps();
+            parser.readCsv("food_data.csv", true);
+            // parser.printMaps();
             parser.printSizes();
             optionStatus[2] = true;
           }
@@ -358,12 +379,13 @@ void UI::StartUI() {
             cout << "GREEDY" << endl;
             auto greedyStart = chrono::high_resolution_clock::now();
             //call greedy
+            greedyResult = runKnapsackGreedy(parser.getFoodItems(), weightLimit * 1000);
             auto greedyEnd = chrono::high_resolution_clock::now();
             auto greedyDuration = chrono::duration_cast<chrono::microseconds>(greedyEnd - greedyStart);
             greedyMicroSeconds = greedyDuration.count();
-            //set total weight
-            //final weights is vector<pair<int,float>> (id, weight)
-            // greedyTotalWeight = parser.getTotalWeight(finalWeights);
+            //set total weight (divide by 1000 bc result weight is in grams, convert to kg)
+            greedyTotalWeight = greedyResult.totalWeight/1000.00;
+            greedyTotalCals = greedyResult.totalCalories;
 
             optionStatus[4] = true;
             rm.greedyTexts["title"].first.setString("GREEDY:");
@@ -371,7 +393,7 @@ void UI::StartUI() {
 
             string currString = rm.greedyTexts["time"].first.getString();
             ostringstream ss;
-            ss << currString << "\n\n" << fixed << setprecision(2) << greedyMicroSeconds << " us";
+            ss << currString << "\n\n" << fixed << setprecision(2) << greedyMicroSeconds/1000 << " ms";
             rm.greedyTexts["time"].first.setString(ss.str());
             //clear ss
             ss.str("");
@@ -396,9 +418,11 @@ void UI::StartUI() {
             auto dpStart = chrono::high_resolution_clock::now();
             //call dp
             //weight limit * 1000 bc need to convert to grams
-            dpResult = runKnapsackDP(parser.getFoodItems(), weightLimit * 1000);
+            int limitKG = static_cast<int>(weightLimit) * 1000;
+            cout << "WEIGHT LIMIT PARAMETER: " << limitKG  << endl;
+            dpResult = runKnapsackDP(parser.getFoodItems(), limitKG);
+
             auto dpEnd = chrono::high_resolution_clock::now();
-            cout << "WEIGHT LIMIT PARAMETER: " << weightLimit  << endl;
             auto dpDuration = chrono::duration_cast<chrono::microseconds>(dpEnd - dpStart);
             dynamicMicroSeconds = dpDuration.count();
             //weights in grams in csv so divide by 1000 when displaying as kg
@@ -411,7 +435,7 @@ void UI::StartUI() {
 
             string currString = rm.dynamicTexts["time"].first.getString();
             ostringstream ss;
-            ss << currString << "\n\n" << fixed << setprecision(2) <<  dynamicMicroSeconds << "  us";
+            ss << currString << "\n\n" << fixed << setprecision(2) <<  dynamicMicroSeconds/1000 << "  ms";
             cout << "TIME STRING: " << ss.str() << endl;
             rm.dynamicTexts["time"].first.setString(ss.str());
             ss.str("");
@@ -431,10 +455,16 @@ void UI::StartUI() {
           //go to results display
           optionStatus[6] = true;
           currScreen = SCREEN::DISPLAY_RESULTS;
-          if (optionStatus[4] && optionStatus[5]) {
-            optimal = findOptimal();
-            float percentageFaster = abs(greedyMicroSeconds/dynamicMicroSeconds);
-          }
+        }
+        if (event.key.code == sf::Keyboard::Num8) {
+          windowTitle.setString("GET PRODUCT NAME FROM 7 DIGIT PRODUCT ID");
+          windowTitle.setPosition(210,140);
+          optionStatus[7] = true;
+          currScreen = SCREEN::INPUT;
+          selectedOption = 8;
+          sf::Event bufferEvent;
+          while (mainWindow.pollEvent(bufferEvent)) {}
+          break;
         }
         userInput.clear();
         userInputDisplay.setString(userInput);
@@ -516,6 +546,36 @@ void UI::StartUI() {
           userInputDisplay.setString(userInput);
           currInputMode = INPUT_MODE::ENTER;
         }
+
+        if (selectedOption == 8) {
+            if (event.type == sf::Event::KeyPressed) {
+              if (event.key.code == sf::Keyboard::Enter) {
+                if (userInput.length() == 7) {
+                  string res = "";
+                  try {
+                    res = parser.getName(stoi(userInput), apiKey);
+                  }
+                  catch (nlohmann::json::exception e) {
+                    res = "CANNOT OBTAIN PRODUCT NAME (INVALID ID)";
+                  }
+
+                  string company = parser.getCompanyName(stoi(userInput));
+                  nameText.setString("PRODUCT NAME: \n" + company + "\n"  + res);
+                }
+              }
+              else if (event.key.code == sf::Keyboard::BackSpace) {
+                if (!userInput.empty()) {
+                  userInput.pop_back();
+                }
+              }
+            }
+          else if (event.type == sf::Event::TextEntered) {
+            if (event.text.unicode >= '0' && event.text.unicode <= '9' && userInput.length() < 7) {
+              userInput += static_cast<char>(event.text.unicode);
+            }
+          }
+          userInputDisplay.setString(userInput);
+        }
       }
       else if (currScreen == SCREEN::DISPLAY_RESULTS) {
         //if both greedy and dp run then can get files of items chosen
@@ -524,10 +584,18 @@ void UI::StartUI() {
               if (event.key.code == sf::Keyboard::W) {
                 //create greedy and dynamic txt files listing items chosen
                 if (apiKey.empty() || !validKey) {
-                  // ofstream outFileGreedy;
+                  ofstream outFileGreedy("greedyItemsChosen.txt");
                   ofstream outFileDp("dynamicItemsChosen.txt");
                   //default to product ids
                   //greedy
+                  for (int i = 0; i < greedyResult.selectedItems.size(); ++i) {
+                    if (i != greedyResult.selectedItems.size() - 1) {
+                      outFileGreedy << greedyResult.selectedItems[i].id <<"\n";
+                    }
+                    else {
+                      outFileGreedy << greedyResult.selectedItems[i].id;
+                    }
+                  }
                   //dynamic
                   for (int i = 0; i < dpResult.selectedItems.size(); ++i) {
                     if (i != dpResult.selectedItems.size() - 1) {
@@ -539,15 +607,8 @@ void UI::StartUI() {
                   }
 
                 }
-                else if (validKey && !apiKey.empty()) {
-                  //make api requests
-                  cout << "NAMES: " << endl;
-                  // parser.createItemTxt(greedyResult, 0, apiKey);
-                  parser.createItemTxt(dpResult, 1, apiKey);
-                }
+
                 // cout << "VALID W PRESS " << endl;
-
-
               }
             }
           }
@@ -608,6 +669,14 @@ void UI::StartUI() {
         }
 
         if (optionStatus[4] && optionStatus[5]) {
+          // if (isDpOptimalRatio()) {
+          //   rm.dynamicTexts["title"].first.setFillColor(sf::Color(sf::Color::Green));
+          //   rm.dynamicTexts["title"].first.setStyle(sf::Text::Bold);
+          // }
+          // else {
+          //   rm.greedyTexts["title"].first.setFillColor(sf::Color(sf::Color::Green));
+          //   rm.greedyTexts["title"].first.setStyle(sf::Text::Bold);
+          // }
           mainWindow.draw(fileOptionText);
         }
       }
@@ -637,6 +706,13 @@ void UI::StartUI() {
         mainWindow.draw(unitText);
         mainWindow.draw(weightDefaultText);
       }
+
+      //get name from id
+      if (selectedOption == 8) {
+        userInputDisplay.setString(userInput);
+        mainWindow.draw(userInputDisplay);
+        mainWindow.draw(nameText);
+      }
     }
 
     else if (currScreen == SCREEN::OPTIONS) {
@@ -645,10 +721,13 @@ void UI::StartUI() {
       //view results never green, api key option only green/complete when valid key added
       //color green if completed
       for (auto opt : rm.optionTexts) {
-        if (optionStatus[i] && i != 6) {
+        if (i == 7 && (!validKey || apiKey.empty())) {
+          opt.setFillColor(sf::Color(128,128,128));
+        }
+        if (optionStatus[i] && i != 6 && i != 7) {
           opt.setFillColor(sf::Color::Green);
           if (i == 0 && !validKey) {
-            opt.setFillColor(sf::Color(235, 176, 82));
+            opt.setFillColor(sf::Color(237, 137, 7));
           }
           else if (i == 0 && apiKey.empty()) {
             opt.setFillColor(sf::Color::White);
