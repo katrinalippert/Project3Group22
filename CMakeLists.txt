@@ -20,11 +20,20 @@ target_link_libraries(Project3Group22 PRIVATE CURL::libcurl sfml-system sfml-win
 set(CURL_DLL_PATH "${CMAKE_SOURCE_DIR}/dependencies/curl/curl-8.15.0_4-win64-mingw/bin/libcurl-x64.dll")
 
 
-#to copy liburl dll so it can be used at runtime
+# Copy all SFML DLLs to the output folder
+add_custom_command(
+        TARGET Project3Group22
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/dependencies/SFML/SFML-2.5.1/bin"
+        $<TARGET_FILE_DIR:Project3Group22>
+)
+
+# Copy libcurl DLL to the output folder
 add_custom_command(
         TARGET Project3Group22
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CURL_DLL_PATH}"
+        "${CMAKE_SOURCE_DIR}/dependencies/curl/curl-8.15.0_4-win64-mingw/bin/libcurl-x64.dll"
         $<TARGET_FILE_DIR:Project3Group22>
 )
